@@ -1,0 +1,126 @@
+<!-- locations/templates/locations/measurement_room_detail.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Measurements for Room - {{ room.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Room Header -->
+    <h2 class="mb-4">Measurements for Room: {{ room.name }}</h2>
+
+    <!-- Room Information -->
+    <div class="mb-4">
+        <p><strong>Floor:</strong> {{ room.floor }}</p>
+        <p><strong>Building:</strong> {{ room.building.name }}</p>
+        <p><strong>Capacity:</strong> {{ room.capacity }}</p>
+        <p><strong>Responsible User:</strong> {{ room.responsible_user }}</p>
+    </div>
+
+    <!-- Measurement Chart -->
+    <div class="mb-4">
+        <canvas id="measurementChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Add Measurement Button -->
+    <div class="mb-4">
+        <!-- The button links to the measurement_create view with the current room's ID as a GET parameter -->
+        <a href="{% url 'measurement_create' %}?room={{ room.id }}" class="btn btn-primary">Add Measurement</a>
+    </div>
+</div>
+
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Retrieve the data passed from the view
+    const timestamps = {{ timestamps|safe }};
+    const temperatures = {{ temperatures|safe }};
+    const humidities = {{ humidities|safe }};
+
+    // Prepare the data for Chart.js
+    const data = {
+        labels: timestamps,
+        datasets: [
+            {
+                label: 'Temperature (°C)',
+                data: temperatures,
+                borderColor: 'rgba(255, 99, 132, 1)', // Red
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
+                yAxisID: 'y1',
+                tension: 0.4, // Smooth curves
+                fill: true,
+            },
+            {
+                label: 'Humidity (%)',
+                data: humidities,
+                borderColor: 'rgba(54, 162, 235, 1)', // Blue
+                backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
+                yAxisID: 'y2',
+                tension: 0.4,
+                fill: true,
+            }
+        ]
+    };
+
+    // Configure the chart options
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            stacked: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Measurements for Room: {{ room.name }}'
+                },
+                tooltip: {
+                    enabled: true,
+                    mode: 'nearest',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
+                    },
+                    ticks: {
+                        beginAtZero: true,
+                    }
+                },
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false, // Only draw grid lines for y1
+                    },
+                    title: {
+                        display: true,
+                        text: 'Humidity (%)'
+                    },
+                    ticks: {
+                        beginAtZero: true,
+                    }
+                }
+            }
+        },
+    };
+
+    // Render the chart
+    const myChart = new Chart(
+        document.getElementById('measurementChart'),
+        config
+    );
+</script>
+{% endblock %}

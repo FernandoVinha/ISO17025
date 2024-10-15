@@ -1,0 +1,102 @@
+<!-- locations/templates/locations/room_form.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Nome da Sala -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome da Sala</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">
+                    {{ form.name.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Andar -->
+        <div class="mb-3">
+            <label for="id_floor" class="form-label">Andar</label>
+            <input type="text" name="floor" id="id_floor" class="form-control" value="{{ form.floor.value|default:'' }}" required>
+            {% if form.floor.errors %}
+                <div class="text-danger">
+                    {{ form.floor.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Edifício -->
+        <div class="mb-3">
+            <label for="id_building" class="form-label">Edifício</label>
+            <select name="building" id="id_building" class="form-select" required>
+                <option value="">---------</option>
+                {% for building in form.building.field.queryset %}
+                    <option value="{{ building.id }}" {% if form.building.value == building.id %}selected{% endif %}>
+                        {{ building.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.building.errors %}
+                <div class="text-danger">
+                    {{ form.building.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Capacidade Máxima -->
+        <div class="mb-3">
+            <label for="id_capacity" class="form-label">Capacidade Máxima</label>
+            <input type="number" name="capacity" id="id_capacity" class="form-control" min="1" value="{{ form.capacity.value|default:'' }}" required>
+            {% if form.capacity.errors %}
+                <div class="text-danger">
+                    {{ form.capacity.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Usuário Responsável -->
+        <div class="mb-3">
+            <label for="id_responsible_user" class="form-label">Usuário Responsável</label>
+            <select name="responsible_user" id="id_responsible_user" class="form-select">
+                <option value="">---------</option>
+                {% for user in form.responsible_user.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.responsible_user.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.responsible_user.errors %}
+                <div class="text-danger">
+                    {{ form.responsible_user.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Imagem da Sala -->
+        <div class="mb-3">
+            <label for="id_image" class="form-label">Imagem da Sala</label>
+            <input type="file" name="image" id="id_image" class="form-control">
+            {% if form.image.errors %}
+                <div class="text-danger">
+                    {{ form.image.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if room %}
+            <a href="{% url 'room_delete' room.id %}" class="btn btn-danger">Deletar Sala</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
