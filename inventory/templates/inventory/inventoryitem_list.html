@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lista de Itens de Inventário{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Itens de Inventário</h2>
+        <a href="{% url 'inventoryitem_create' %}" class="btn btn-primary">Adicionar Item</a>
+    </div>
+
+    <!-- Barra de busca -->
+    <form method="get" action="{% url 'inventoryitem_list' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Buscar item..." value="{{ request.GET.search }}">
+            <button type="submit" class="btn btn-secondary">Filtrar</button>
+        </div>
+    </form>
+
+    <!-- Cards de itens de inventário -->
+    <div class="row">
+        {% for item in inventory_items %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100" style="cursor: pointer;" onclick="window.location.href='{% url 'inventoryitem_edit' item.id %}'">
+                    <div class="d-flex align-items-center p-3">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <!-- Imagem padrão caso não tenha image -->
+                            <img src="{% static 'images/default_item.png' %}" alt="Sem Imagem" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <h5 class="card-title mb-1">{{ item.name }}</h5>
+                            <p class="card-text mb-0">Número de Série: {{ item.serial_number }}</p>
+                            <p class="card-text">Fornecedor: {{ item.supplier }}</p>
+                            <p class="card-text">Data de Validade: {{ item.expiration_date|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">Nenhum item encontrado.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
