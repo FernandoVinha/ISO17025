@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Confirmar Exclusão</h2>
+    <p>Tem certeza de que deseja excluir o item <strong>{{ item_name }}</strong>? Esta ação não pode ser desfeita.</p>
+    
+    <form method="POST" action="{{ delete_url }}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{{ cancel_url }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
