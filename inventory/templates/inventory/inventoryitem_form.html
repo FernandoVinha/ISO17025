@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Nome do Item -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome do Item</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">
+                    {{ form.name.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Número de Série -->
+        <div class="mb-3">
+            <label for="id_serial_number" class="form-label">Número de Série</label>
+            <input type="text" name="serial_number" id="id_serial_number" class="form-control" value="{{ form.serial_number.value|default:'' }}" required>
+            {% if form.serial_number.errors %}
+                <div class="text-danger">
+                    {{ form.serial_number.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Tipo de Item -->
+        <div class="mb-3">
+            <label for="id_item_type" class="form-label">Tipo de Item</label>
+            <select name="item_type" id="id_item_type" class="form-select" required>
+                <option value="">---------</option>
+                {% for value, label in form.item_type.field.choices %}
+                    <option value="{{ value }}" {% if form.item_type.value == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.item_type.errors %}
+                <div class="text-danger">
+                    {{ form.item_type.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Fornecedor -->
+        <div class="mb-3">
+            <label for="id_supplier" class="form-label">Fornecedor</label>
+            <input type="text" name="supplier" id="id_supplier" class="form-control" value="{{ form.supplier.value|default:'' }}" required>
+            {% if form.supplier.errors %}
+                <div class="text-danger">
+                    {{ form.supplier.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Custo -->
+        <div class="mb-3">
+            <label for="id_cost" class="form-label">Custo</label>
+            <input type="number" name="cost" id="id_cost" class="form-control" value="{{ form.cost.value|default:'' }}" step="0.01" required>
+            {% if form.cost.errors %}
+                <div class="text-danger">
+                    {{ form.cost.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data de Fabricação -->
+        <div class="mb-3">
+            <label for="id_manufacturing_date" class="form-label">Data de Fabricação</label>
+            <input type="date" name="manufacturing_date" id="id_manufacturing_date" class="form-control" value="{{ form.manufacturing_date.value|default:'' }}" required>
+            {% if form.manufacturing_date.errors %}
+                <div class="text-danger">
+                    {{ form.manufacturing_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data de Validade -->
+        <div class="mb-3">
+            <label for="id_expiration_date" class="form-label">Data de Validade</label>
+            <input type="date" name="expiration_date" id="id_expiration_date" class="form-control" value="{{ form.expiration_date.value|default:'' }}">
+            {% if form.expiration_date.errors %}
+                <div class="text-danger">
+                    {{ form.expiration_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quantidade -->
+        <div class="mb-3">
+            <label for="id_quantity" class="form-label">Quantidade</label>
+            <input type="number" name="quantity" id="id_quantity" class="form-control" value="{{ form.quantity.value|default:'' }}" step="0.01">
+            {% if form.quantity.errors %}
+                <div class="text-danger">
+                    {{ form.quantity.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Unidade -->
+        <div class="mb-3">
+            <label for="id_unit" class="form-label">Unidade</label>
+            <select name="unit" id="id_unit" class="form-select">
+                <option value="">---------</option>
+                <option value="L" {% if form.unit.value == 'L' %}selected{% endif %}>Litros</option>
+                <option value="G" {% if form.unit.value == 'G' %}selected{% endif %}>Gramas</option>
+            </select>
+            {% if form.unit.errors %}
+                <div class="text-danger">
+                    {{ form.unit.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Imagem do Item -->
+        <div class="mb-3">
+            <label for="id_image" class="form-label">Imagem do Item</label>
+            <input type="file" name="image" id="id_image" class="form-control">
+            {% if form.image.errors %}
+                <div class="text-danger">
+                    {{ form.image.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Usuário Responsável -->
+        <div class="mb-3">
+            <label for="id_responsible_user" class="form-label">Usuário Responsável</label>
+            <select name="responsible_user" id="id_responsible_user" class="form-select">
+                <option value="">---------</option>
+                {% for user in form.responsible_user.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.responsible_user.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.responsible_user.errors %}
+                <div class="text-danger">
+                    {{ form.responsible_user.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if inventory_item %}
+            <a href="{% url 'inventoryitem_delete' inventory_item.id %}" class="btn btn-danger">Deletar Item</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
