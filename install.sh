@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Clone the repository with the main branch
-git clone -b main https://github.com/FernandoVinha/ISO17025.git
-cd ISO17025 || exit
+# Navegar para o diretório do projeto, caso necessário
+# cd /caminho/para/seu/projeto
 
 # Fetch all remote branches
 git fetch origin
@@ -26,6 +25,27 @@ git merge origin/inventory -m "Merge branch 'inventory' into main"
 echo "Merging origin/locations into main..."
 git merge origin/locations -m "Merge branch 'locations' into main"
 
-# Final confirmation
-echo "All branches have been merged into main. Check for conflicts and resolve them if needed."
+# Create and activate virtual environment
+echo "Creating virtual environment..."
+python3 -m venv venv
 
+echo "Activating virtual environment..."
+source venv/bin/activate
+
+# Install dependencies from requirements.txt
+echo "Installing dependencies..."
+pip install -r requirements.txt
+
+# Run makemigrations and migrate
+echo "Running makemigrations..."
+python manage.py makemigrations
+
+echo "Running migrate..."
+python manage.py migrate
+
+# Create superuser
+echo "Creating superuser..."
+python manage.py createsuperuser
+
+# Final confirmation
+echo "All branches have been merged into main, dependencies installed, migrations applied, and superuser created. Check for any issues."
