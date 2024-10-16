@@ -1,0 +1,73 @@
+<!-- locations/templates/locations/building_form.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Nome do Edifício -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome do Edifício</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">
+                    {{ form.name.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Endereço -->
+        <div class="mb-3">
+            <label for="id_address" class="form-label">Endereço</label>
+            <textarea name="address" id="id_address" class="form-control" rows="3" required>{{ form.address.value|default:'' }}</textarea>
+            {% if form.address.errors %}
+                <div class="text-danger">
+                    {{ form.address.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Usuário Responsável -->
+        <div class="mb-3">
+            <label for="id_responsible_user" class="form-label">Usuário Responsável</label>
+            <select name="responsible_user" id="id_responsible_user" class="form-select">
+                <option value="">---------</option>
+                {% for user in form.responsible_user.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.responsible_user.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.responsible_user.errors %}
+                <div class="text-danger">
+                    {{ form.responsible_user.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Imagem do Edifício -->
+        <div class="mb-3">
+            <label for="id_image" class="form-label">Imagem do Edifício</label>
+            <input type="file" name="image" id="id_image" class="form-control">
+            {% if form.image.errors %}
+                <div class="text-danger">
+                    {{ form.image.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if building %}
+            <a href="{% url 'building_delete' building.id %}" class="btn btn-danger">Deletar Edifício</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

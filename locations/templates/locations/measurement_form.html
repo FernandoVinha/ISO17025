@@ -1,0 +1,58 @@
+<!-- locations/templates/locations/measurement_form.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        
+        <!-- Sala Dropdown -->
+        <div class="mb-3">
+            <label for="id_room" class="form-label">Sala</label>
+            <select name="room" id="id_room" class="form-select" required>
+                <option value="">---------</option>
+                {% for room in form.room.field.queryset %}
+                    <option value="{{ room.id }}" {% if form.room.value == room.id %}selected{% endif %}>
+                        {{ room.name }} ({{ room.building.name }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.room.errors %}
+                <div class="text-danger">
+                    {{ form.room.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Temperatura -->
+        <div class="mb-3">
+            <label for="id_temperature" class="form-label">Temperatura (°C)</label>
+            <input type="number" step="0.1" name="temperature" id="id_temperature" class="form-control" value="{{ form.temperature.value|default:'' }}" required>
+            {% if form.temperature.errors %}
+                <div class="text-danger">
+                    {{ form.temperature.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Umidade -->
+        <div class="mb-3">
+            <label for="id_humidity" class="form-label">Umidade (%)</label>
+            <input type="number" step="0.1" name="humidity" id="id_humidity" class="form-control" value="{{ form.humidity.value|default:'' }}" required>
+            {% if form.humidity.errors %}
+                <div class="text-danger">
+                    {{ form.humidity.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'measurement_room_detail' form.room.value %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
