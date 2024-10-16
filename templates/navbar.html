@@ -1,0 +1,85 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <!-- Brand/Logo -->
+        <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+        
+        <!-- Toggler Button for Mobile Devices -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" 
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav mx-auto">
+                {% if user.is_authenticated %}
+                    <!-- Management Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Management
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="managementDropdown">
+                            {% if permissions.can_view_companies %}
+                                <li><a class="dropdown-item" href="{% url 'companies_list' %}">Companies</a></li>
+                            {% endif %}
+                            {% if permissions.can_view_contacts %}
+                                <li><a class="dropdown-item" href="{% url 'contacts_list' %}">Contacts</a></li>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'invite_user' %}">Invite User</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+
+                    <!-- Locations Dropdown -->
+                    {% if permissions.can_view_building or permissions.can_view_room or permissions.can_view_measurement %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="locationsDropdown" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Locations
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="locationsDropdown">
+                                {% if permissions.can_view_building %}
+                                    <li><a class="dropdown-item" href="{% url 'building_list' %}">Buildings</a></li>
+                                {% endif %}
+                                {% if permissions.can_view_room %}
+                                    <li><a class="dropdown-item" href="{% url 'room_list' %}">Rooms</a></li>
+                                {% endif %}
+                                {% if permissions.can_view_measurement %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'measurement_room_list' %}">Measurements</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+
+                    <!-- Inventory Dropdown -->
+                    {% if permissions.can_view_inventoryitem %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="inventoryDropdown" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Inventory
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="inventoryDropdown">
+                                <li><a class="dropdown-item" href="{% url 'inventoryitem_list' %}">Items</a></li>
+                                <li><a class="dropdown-item" href="{% url 'inventoryitem_create' %}">Add Item</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+
+                    <!-- Logout Link with Red Background and White Text -->
+                    <li class="nav-item">
+                        <a class="nav-link text-white bg-danger rounded px-2" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <!-- Login Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

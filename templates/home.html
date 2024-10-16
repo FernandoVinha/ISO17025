@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center">
+        <h2>Welcome to My Management System</h2>
+        <p class="lead mt-3">This is the home page of the laboratory management system. Please log in to access your dashboard and manage your tasks.</p>
+        <p>If you don’t have an account, please contact the administrator for an invitation link.</p>
+        <a class="btn btn-primary mt-3" href="{% url 'login' %}">Login</a>
+    </div>
+</div>
+{% endblock %}
