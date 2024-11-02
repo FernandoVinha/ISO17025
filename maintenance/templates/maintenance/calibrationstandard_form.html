@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Nome do Padrão -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome do Padrão</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">
+                    {{ form.name.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Número de Série -->
+        <div class="mb-3">
+            <label for="id_serial_number" class="form-label">Número de Série</label>
+            <input type="text" name="serial_number" id="id_serial_number" class="form-control" value="{{ form.serial_number.value|default:'' }}" required>
+            {% if form.serial_number.errors %}
+                <div class="text-danger">
+                    {{ form.serial_number.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data da Última Calibração -->
+        <div class="mb-3">
+            <label for="id_last_calibration_date" class="form-label">Data da Última Calibração</label>
+            <input type="date" name="last_calibration_date" id="id_last_calibration_date" class="form-control" value="{{ form.last_calibration_date.value|default:'' }}" required>
+            {% if form.last_calibration_date.errors %}
+                <div class="text-danger">
+                    {{ form.last_calibration_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Organismo Certificador -->
+        <div class="mb-3">
+            <label for="id_certification_body" class="form-label">Organismo Certificador</label>
+            <input type="text" name="certification_body" id="id_certification_body" class="form-control" value="{{ form.certification_body.value|default:'' }}" required>
+            {% if form.certification_body.errors %}
+                <div class="text-danger">
+                    {{ form.certification_body.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Margem de Erro Aceitável -->
+        <div class="mb-3">
+            <label for="id_acceptable_error_margin" class="form-label">Margem de Erro Aceitável</label>
+            <input type="number" step="any" name="acceptable_error_margin" id="id_acceptable_error_margin" class="form-control" value="{{ form.acceptable_error_margin.value|default:'' }}" required>
+            {% if form.acceptable_error_margin.errors %}
+                <div class="text-danger">
+                    {{ form.acceptable_error_margin.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Documento de Certificação -->
+        <div class="mb-3">
+            <label for="id_document" class="form-label">Documento de Certificação</label>
+            <input type="file" name="document" id="id_document" class="form-control">
+            {% if form.document.errors %}
+                <div class="text-danger">
+                    {{ form.document.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'calibrationstandard_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

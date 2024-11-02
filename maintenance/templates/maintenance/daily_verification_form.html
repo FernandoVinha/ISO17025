@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }} - Daily Verifications</h2>
+    <form method="POST" enctype="multipart/form-data" id="verificationForm">
+        {% csrf_token %}
+
+        <!-- Item Dropdown -->
+        <div class="mb-3">
+            <label for="id_item" class="form-label">Equipment</label>
+            <select name="item" id="id_item" class="form-select" required>
+                <option value="">---------</option>
+                {% for item in form.item.field.queryset %}
+                    <option value="{{ item.id }}" {% if form.item.value == item.id %}selected{% endif %}>
+                        {{ item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.item.errors %}
+                <div class="text-danger">{{ form.item.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Measurement Uncertainty (from last calibration) -->
+        <div class="mb-3">
+            <label for="id_measurement_uncertainty" class="form-label">Measurement Uncertainty</label>
+            <input type="text" id="id_measurement_uncertainty" class="form-control" value="{{ measurement_uncertainty }}" readonly>
+        </div>
+
+        <!-- Dynamic Field for Measurements (Expected Value / Found Value) -->
+        <div class="mb-3">
+            <label class="form-label">Measurements (Expected Value / Found Value)</label>
+            <div id="measurementsContainer">
+                <!-- Dynamic pairs will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Hidden JSON field to store the compiled results -->
+        <input type="hidden" name="measurements" id="id_measurements">
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'daily_verification_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let measurementsContainer = document.getElementById('measurementsContainer');
+        let measurementUncertainty = parseFloat(document.getElementById('id_measurement_uncertainty').value) || 0;
+        let measurementsField = document.getElementById('id_measurements');
+
+        // Add an initial field when the page loads
+        addField();
+
+        // Add new fields dynamically when existing ones are filled
+        measurementsContainer.addEventListener('input', function (e) {
+            if (e.target.classList.contains('expected-value') || e.target.classList.contains('found-value')) {
+                let allFields = document.querySelectorAll('.measurement-field-group');
+                let lastField = allFields[allFields.length - 1];
+                let expectedValueField = lastField.querySelector('.expected-value');
+                let foundValueField = lastField.querySelector('.found-value');
+
+                // Add a new field if the last pair is filled
+                if (expectedValueField.value && foundValueField.value) {
+                    addField();
+                }
+            }
+        });
+
+        function addField() {
+            let fieldGroup = document.createElement('div');
+            fieldGroup.classList.add('mb-3', 'row', 'measurement-field-group');
+
+            let expectedValueDiv = document.createElement('div');
+            expectedValueDiv.classList.add('col-md-5');
+            let expectedValue = document.createElement('input');
+            expectedValue.type = 'number';
+            expectedValue.name = 'expected_value';
+            expectedValue.placeholder = 'Expected Value';
+            expectedValue.classList.add('form-control', 'expected-value');
+            expectedValueDiv.appendChild(expectedValue);
+
+            let foundValueDiv = document.createElement('div');
+            foundValueDiv.classList.add('col-md-5');
+            let foundValue = document.createElement('input');
+            foundValue.type = 'number';
+            foundValue.name = 'found_value';
+            foundValue.placeholder = 'Found Value';
+            foundValue.classList.add('form-control', 'found-value');
+            foundValue.addEventListener('input', validateTolerance);
+            foundValueDiv.appendChild(foundValue);
+
+            let removeButtonDiv = document.createElement('div');
+            removeButtonDiv.classList.add('col-md-2', 'd-flex', 'align-items-center');
+            let removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.classList.add('btn', 'btn-danger', 'w-100');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', function () {
+                measurementsContainer.removeChild(fieldGroup);
+            });
+            removeButtonDiv.appendChild(removeButton);
+
+            fieldGroup.appendChild(expectedValueDiv);
+            fieldGroup.appendChild(foundValueDiv);
+            fieldGroup.appendChild(removeButtonDiv);
+            measurementsContainer.appendChild(fieldGroup);
+        }
+
+        function validateTolerance(e) {
+            let expectedValue = parseFloat(e.target.parentElement.previousElementSibling.querySelector('.expected-value').value);
+            let foundValue = parseFloat(e.target.value);
+            
+            if (isNaN(expectedValue) || isNaN(foundValue)) return;
+
+            let toleranceExceeded = Math.abs(foundValue - expectedValue) > measurementUncertainty;
+            
+            if (toleranceExceeded) {
+                e.target.classList.add('is-invalid');
+                e.target.setCustomValidity("Value exceeds acceptable tolerance!");
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setCustomValidity("");
+            }
+        }
+
+        // Before submitting the form, compile the results into a JSON array and store them in the hidden field
+        document.getElementById('verificationForm').addEventListener('submit', function (e) {
+            let measurementPairs = [];
+            let expectedFields = document.querySelectorAll('input[name="expected_value"]');
+            let foundFields = document.querySelectorAll('input[name="found_value"]');
+
+            expectedFields.forEach((expectedField, index) => {
+                let expectedValue = expectedField.value;
+                let foundValue = foundFields[index].value;
+                if (expectedValue && foundValue) {
+                    measurementPairs.push({
+                        'expected': parseFloat(expectedValue),
+                        'found': parseFloat(foundValue)
+                    });
+                }
+            });
+
+            // Convert the measurementPairs array to JSON and store it in the hidden field
+            measurementsField.value = JSON.stringify(measurementPairs);
+        });
+    });
+</script>
+{% endblock %}

@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .models import RelationshipType, Companies, Contacts, Invitation
-from .forms import RelationshipTypeForm, CompaniesForm, ContactsForm, InvitationForm
+from .models import RelationshipType, Invitation
+from .forms import RelationshipTypeForm, InvitationForm
 from django.contrib.auth.forms import AuthenticationForm
+from .forms import CustomUserCreationForm, ProfileUpdateForm
 
 # ====== Login and Logout Views ======
 
@@ -104,136 +105,48 @@ def relationshiptype_delete(request, pk):
         'cancel_url': 'relationshiptype_list'
     })
 
-# ====== Companies Views ======
-
-@login_required
-@permission_required('accounts.view_companies', raise_exception=True)
-def companies_list(request):
-    search_query = request.GET.get('search', '')
-    companies = Companies.objects.filter(name__icontains=search_query) if search_query else Companies.objects.all()
-    return render(request, 'accounts/companies_list.html', {'companies': companies})
-
-@login_required
-@permission_required('accounts.create_companies', raise_exception=True)
-def companies_create(request):
-    relationship_types = RelationshipType.objects.all()
-
-    if request.method == 'POST':
-        form = CompaniesForm(request.POST, request.FILES)  # Include `request.FILES` for file upload
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Company created successfully!")
-            return redirect('companies_list')
-    else:
-        form = CompaniesForm()
-
-    return render(request, 'accounts/companies_form.html', {
-        'form': form,
-        'relationship_types': relationship_types
-    })
-
-@login_required
-@permission_required('accounts.edit_companies', raise_exception=True)
-def companies_edit(request, pk):
-    company = get_object_or_404(Companies, pk=pk)
-    relationship_types = RelationshipType.objects.all()
-
-    if request.method == 'POST':
-        form = CompaniesForm(request.POST, request.FILES, instance=company)  # Include `request.FILES`
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Company updated successfully!")
-            return redirect('companies_list')
-    else:
-        form = CompaniesForm(instance=company)
-
-    return render(request, 'accounts/companies_form.html', {
-        'form': form,
-        'company': company,
-        'relationship_types': relationship_types
-    })
-
-@login_required
-@permission_required('accounts.delete_companies', raise_exception=True)
-def companies_delete(request, pk):
-    company = get_object_or_404(Companies, pk=pk)
-    if request.method == 'POST':
-        company.delete()
-        messages.success(request, "Company deleted successfully!")
-        return redirect('companies_list')
-    return render(request, 'confirm_delete.html', {
-        'item_name': company.name,
-        'delete_url': request.path,
-        'cancel_url': 'companies_list'
-    })
-
-# ====== Contacts Views ======
-
-@login_required
-@permission_required('accounts.view_contacts', raise_exception=True)
-def contacts_list(request):
-    search_query = request.GET.get('search', '')
-    contacts = Contacts.objects.filter(name__icontains=search_query) if search_query else Contacts.objects.all()
-    return render(request, 'accounts/contacts_list.html', {'contacts': contacts})
-
-@login_required
-@permission_required('accounts.create_contacts', raise_exception=True)
-def contacts_create(request):
-    companies = Companies.objects.all()  # Fetch the list of companies
-    if request.method == 'POST':
-        form = ContactsForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Contact created successfully!")
-            return redirect('contacts_list')
-    else:
-        form = ContactsForm()
-    
-    return render(request, 'accounts/contacts_form.html', {
-        'form': form,
-        'companies': companies,  # Pass the companies list to the template
-        'title': 'Add Contact', 
-        'button_label': 'Save'
-    })
-
-@login_required
-@permission_required('accounts.edit_contacts', raise_exception=True)
-def contacts_edit(request, pk):
-    contact = get_object_or_404(Contacts, pk=pk)
-    companies = Companies.objects.all()  # Fetch the list of companies
-
-    if request.method == 'POST':
-        form = ContactsForm(request.POST, request.FILES, instance=contact)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Contact updated successfully!")
-            return redirect('contacts_list')
-    else:
-        form = ContactsForm(instance=contact)
-
-    return render(request, 'accounts/contacts_form.html', {
-        'form': form,
-        'companies': companies,  # Pass the companies list to the template
-        'contact': contact,
-        'title': 'Edit Contact', 
-        'button_label': 'Update'
-    })
-
-@login_required
-@permission_required('accounts.delete_contacts', raise_exception=True)
-def contacts_delete(request, pk):
-    contact = get_object_or_404(Contacts, pk=pk)
-    if request.method == 'POST':
-        contact.delete()
-        messages.success(request, "Contact deleted successfully!")
-        return redirect('contacts_list')
-    return render(request, 'confirm_delete.html', {
-        'item_name': contact.name,
-        'delete_url': request.path,
-        'cancel_url': 'contacts_list'
-    })
-
 # Home page view
-@login_required
 def home_view(request):
     return render(request, 'home.html')
+
+# ====== Registration and Profile Views ======
+
+def register_view(request, token):
+    try:
+        # Verifica se o token de convite é válido
+        invitation = Invitation.objects.get(token=token)
+    except Invitation.DoesNotExist:
+        messages.error(request, "Invalid or expired invitation token.")
+        return redirect('login')
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.email = invitation.email  # Associa o email do convite ao usuário
+            user.role = 'employee'  # Define o valor padrão para 'role'
+            user.save()
+            login(request, user)  # Autentica o usuário automaticamente após o registro
+            messages.success(request, f"Welcome, {user.first_name}! Your account has been created.")
+            return redirect('home')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'accounts/register.html', {'form': form, 'token': token})
+
+@login_required
+def profile_update_view(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('profile')  # Redireciona para a página de perfil
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+
+    return render(request, 'accounts/profile_update.html', {'form': form})

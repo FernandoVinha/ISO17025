@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    
+    <!-- Methodology Form -->
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <!-- If the user can edit, show the update button -->
+        {% if can_edit %}
+            <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        {% else %}
+            <button type="button" class="btn btn-secondary" disabled>Read-Only Mode</button>
+        {% endif %}
+    </form>
+
+    <!-- Form to add supplies, only shown if the user can edit -->
+    {% if can_edit %}
+        <hr>
+        <h4>Add Supplies</h4>
+        <form id="supply-form" method="POST" action="{% url 'methodology_supply_add' methodology.pk %}">
+            {% csrf_token %}
+            {{ supply_form.as_p }}
+            <button type="submit" class="btn btn-success">Add Supply</button>
+        </form>
+    {% endif %}
+
+    <!-- List of existing supplies (loaded dynamically) -->
+    <hr>
+    <h4>Existing Supplies</h4>
+    <div id="supply-list">
+        {% include 'methodologies/partial_supply_list.html' %}
+    </div>
+</div>
+
+<!-- AJAX Script for Adding and Deleting Supplies -->
+<script>
+    // Handle supply form submission via AJAX
+    $('#supply-form').on('submit', function(event) {
+        event.preventDefault();
+        const form = $(this);
+        $.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    $('#supply-list').html(response.html); // Update the supply list
+                    form.trigger('reset'); // Reset the form
+                }
+            }
+        });
+    });
+
+    // Handle delete supply via AJAX
+    $('#supply-list').on('click', '.delete-supply', function() {
+        const supplyId = $(this).data('id');
+        $.ajax({
+            url: `/methodology/supply/delete/${supplyId}/`,
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#supply-list').html(response.html); // Update the supply list
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

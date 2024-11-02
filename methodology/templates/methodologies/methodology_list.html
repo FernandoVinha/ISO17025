@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Methodology List{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-3">
+        <div class="col">
+            <h2>Methodologies</h2>
+        </div>
+        <div class="col text-end">
+            <!-- Button to Add New Methodology -->
+            <a href="{% url 'methodology_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Methodology
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Filter -->
+    <form method="GET">
+        <div class="input-group mb-3">
+            <input type="text" name="title" placeholder="Filter by Title" value="{{ request.GET.title }}" class="form-control">
+            <input type="text" name="author" placeholder="Filter by Author" value="{{ request.GET.author }}" class="form-control">
+            <input type="text" name="equipment" placeholder="Filter by Equipment" value="{{ request.GET.equipment }}" class="form-control">
+            <button type="submit" class="btn btn-secondary">Filter</button>
+        </div>
+    </form>
+
+    <!-- Methodology List -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Equipment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for methodology in methodologies %}
+            <tr>
+                <td>{{ methodology.title }}</td>
+                <td>{{ methodology.author }}</td>
+                <td>
+                    {% for equip in methodology.equipment.all %}
+                        {{ equip.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    <!-- Actions: View/Edit, Delete -->
+                    <a href="{% url 'methodology_edit' methodology.pk %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i> View/Edit
+                    </a>
+                    <a href="{% url 'methodology_delete' methodology.pk %}" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No methodologies found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

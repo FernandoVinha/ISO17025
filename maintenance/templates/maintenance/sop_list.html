@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de SOPs{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Lista de Procedimentos Operacionais Padrão (SOPs)</h2>
+
+    <!-- Formulário de Filtro -->
+    <form method="get" action=".">
+        {{ filter.form.as_p }}
+        <button type="submit" class="btn btn-primary mb-3">Filtrar</button>
+    </form>
+
+    <!-- Exibe Mensagens de Sucesso -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Tabela de SOPs -->
+    <table class="sop-list">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Descrição</th>
+                <th>Documento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sop in page_obj %}
+                <tr>
+                    <td>{{ sop.title }}</td>
+                    <td>{{ sop.description }}</td>
+                    <td>
+                        {% if sop.document %}
+                            <a href="{{ sop.document.url }}" target="_blank">Ver Documento</a>
+                        {% else %}
+                            Não disponível
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Nenhum SOP encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginação -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; primeiro</a>
+                <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+            {% endif %}
+
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">próximo</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">último &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<style>
+    .sop-list { width: 100%; border-collapse: collapse; }
+    .sop-list th, .sop-list td { padding: 10px; text-align: left; }
+    .pagination { margin-top: 20px; }
+</style>
+
+{% endblock %}

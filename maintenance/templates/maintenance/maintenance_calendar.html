@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendário de Manutenção e Calibração{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Calendário de Manutenção e Calibração</h2>
+
+    <!-- Navegação entre meses -->
+    <div class="month-navigation d-flex justify-content-between mb-3">
+        <a href="{% url 'maintenance_calendar' year=prev_year month=prev_month %}" class="btn btn-primary">&laquo; Mês Anterior</a>
+        <span class="month-title">{{ first_day_of_month|date:"F Y" }}</span>
+        <a href="{% url 'maintenance_calendar' year=next_year month=next_month %}" class="btn btn-primary">Próximo Mês &raquo;</a>
+    </div>
+
+    <!-- Tabela de Calendário -->
+    <table class="table table-bordered text-center">
+        <thead class="thead-light">
+            <tr>
+                <th>Dom</th>
+                <th>Seg</th>
+                <th>Ter</th>
+                <th>Qua</th>
+                <th>Qui</th>
+                <th>Sex</th>
+                <th>Sáb</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- Dias em branco antes do início do mês -->
+                {% for _ in empty_days_start %}
+                    <td></td>
+                {% endfor %}
+
+                <!-- Dias do mês -->
+                {% for day_info in days_in_month %}
+                    <td class="{% if day_info.date in maintenance_days and day_info.date in calibration_days %}both{% elif day_info.date in maintenance_days %}maintenance{% elif day_info.date in calibration_days %}calibration{% endif %}">
+                        <a href="{% url 'maintenance_list_by_day' year=day_info.year month=day_info.month day=day_info.day %}">{{ day_info.day }}</a>
+                    </td>
+                    {% if forloop.counter0|add:first_day_weekday|divisibleby:7 %}
+                        </tr><tr>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Dias em branco após o fim do mês -->
+                {% for _ in empty_days_end %}
+                    <td></td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Estilos para o Status -->
+<style>
+    .calendar { width: 100%; border-collapse: collapse; }
+    .calendar th, .calendar td { width: 14%; padding: 10px; text-align: center; }
+    .maintenance { background-color: #FFD700; color: black; border-radius: 50%; padding: 5px; }
+    .calibration { background-color: #6495ED; color: white; border-radius: 50%; padding: 5px; }
+    .both { background-color: #4CAF50; color: white; border-radius: 50%; padding: 5px; }
+    .month-navigation { margin-bottom: 20px; }
+</style>
+{% endblock %}

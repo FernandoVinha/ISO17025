@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Padrões de Calibração{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Lista de Padrões de Calibração</h2>
+
+    <!-- Formulário de Filtro -->
+    <form method="get" action=".">
+        {{ filter.form.as_p }}
+        <button type="submit" class="btn btn-primary mb-3">Filtrar</button>
+    </form>
+
+    <!-- Exibe Mensagens de Sucesso -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Tabela de Padrões de Calibração -->
+    <table class="calibrationstandard-list">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Número de Série</th>
+                <th>Data da Última Calibração</th>
+                <th>Organismo Certificador</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for standard in page_obj %}
+                <tr>
+                    <td>{{ standard.name }}</td>
+                    <td>{{ standard.serial_number }}</td>
+                    <td>{{ standard.last_calibration_date|date:"d/m/Y" }}</td>
+                    <td>{{ standard.certification_body }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">Nenhum padrão de calibração encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginação -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; primeiro</a>
+                <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+            {% endif %}
+
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">próximo</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">último &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<style>
+    .calibrationstandard-list { width: 100%; border-collapse: collapse; }
+    .calibrationstandard-list th, .calibrationstandard-list td { padding: 10px; text-align: left; }
+    .pagination { margin-top: 20px; }
+</style>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" id="disposalForm">
+        {% csrf_token %}
+
+        <!-- Item de Recepção (Exibido, mas desabilitado) -->
+        <div class="mb-3">
+            <label for="id_item" class="form-label">Item de Recepção</label>
+            <input type="text" id="id_item" class="form-control" value="{{ disposal.item.name }}" disabled>
+        </div>
+
+        <!-- Análise (se disponível) -->
+        {% if disposal.analysis %}
+        <div class="mb-3">
+            <label for="id_analysis" class="form-label">Análise</label>
+            <input type="text" id="id_analysis" class="form-control" value="{{ disposal.analysis.methodology.title }}" disabled>
+        </div>
+        {% endif %}
+
+        <!-- Usuário que descartou (Exibido, mas desabilitado) -->
+        <div class="mb-3">
+            <label for="id_disposed_by" class="form-label">Descarte realizado por</label>
+            <input type="text" id="id_disposed_by" class="form-control" value="{{ disposal.disposed_by.get_full_name }}" disabled>
+        </div>
+
+        <!-- Data do Descarte (Exibida, mas desabilitada) -->
+        <div class="mb-3">
+            <label for="id_disposal_date" class="form-label">Data do Descarte</label>
+            <input type="datetime-local" id="id_disposal_date" class="form-control" value="{{ disposal.disposal_date|date:"Y-m-d\TH:i" }}" disabled>
+        </div>
+
+        <!-- Motivo do Descarte -->
+        <div class="mb-3">
+            <label for="id_reason" class="form-label">Motivo do Descarte</label>
+            <textarea name="reason" id="id_reason" class="form-control" required>{{ form.reason.value|default:'' }}</textarea>
+            {% if form.reason.errors %}
+                <div class="text-danger">{{ form.reason.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Comentários Adicionais -->
+        <div class="mb-3">
+            <label for="id_comments" class="form-label">Comentários Adicionais</label>
+            <textarea name="comments" id="id_comments" class="form-control">{{ form.comments.value|default:'' }}</textarea>
+            {% if form.comments.errors %}
+                <div class="text-danger">{{ form.comments.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Descarte</button>
+
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if disposal %}
+            <a href="{% url 'analysis:delete_disposal' disposal.id %}" class="btn btn-danger">Deletar Descarte</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Análise -->
+        <div class="mb-3">
+            <label for="id_analysis" class="form-label">Análise</label>
+            <input type="text" id="id_analysis" class="form-control" value="{{ analysis.item.name }} - {{ analysis.methodology.title }}" disabled>
+        </div>
+
+        <!-- Aprovado por -->
+        <div class="mb-3">
+            <label for="id_approved_by" class="form-label">Aprovado por</label>
+            <select name="approved_by" id="id_approved_by" class="form-select" required>
+                <option value="">---------</option>
+                {% for user in form.approved_by.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.approved_by.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.approved_by.errors %}
+                <div class="text-danger">
+                    {{ form.approved_by.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data de Aprovação -->
+        <div class="mb-3">
+            <label for="id_approval_date" class="form-label">Data de Aprovação</label>
+            <input type="datetime-local" name="approval_date" id="id_approval_date" class="form-control" value="{{ form.approval_date.value|default:'' }}" required>
+            {% if form.approval_date.errors %}
+                <div class="text-danger">
+                    {{ form.approval_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+            <label for="id_status" class="form-label">Status</label>
+            <select name="status" id="id_status" class="form-select" required>
+                <option value="">---------</option>
+                <option value="approved" {% if form.status.value == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="rejected" {% if form.status.value == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+            {% if form.status.errors %}
+                <div class="text-danger">
+                    {{ form.status.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Comentários -->
+        <div class="mb-3">
+            <label for="id_comments" class="form-label">Comentários</label>
+            <textarea name="comments" id="id_comments" class="form-control">{{ form.comments.value|default:'' }}</textarea>
+            {% if form.comments.errors %}
+                <div class="text-danger">
+                    {{ form.comments.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if approval %}
+            <a href="{% url 'analysis:delete_analysis_approval' approval.id %}" class="btn btn-danger">Deletar Aprovação</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

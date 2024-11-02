@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-3k2x^eszmdgr-^t!*u@$0bd34g0e30ip)c=a%ny7x1!+3yab!j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -44,7 +44,11 @@ INSTALLED_APPS = [
 
     'accounts',
     'locations',
-    'inventory'
+    'inventory',
+    'maintenance',
+    'methodology',
+    'analysis',
+
 ]
 
 MIDDLEWARE = [
@@ -70,7 +74,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.user_permissions',  # Context processor personalizado
+                'accounts.context_processors.user_permissions',
+                'locations.context_processors.locations_permissions',
+                'maintenance.context_processors.maintenance_permissions',
+                'methodology.context_processors.methodology_permissions',
+                'analysis.context_processors.analysis_permissions',
+                'inventory.context_processors.inventory_permissions',
             ],
         },
     },
@@ -121,3 +130,10 @@ TWITTER_URL = "https://twitter.com/yourpage"
 LINKEDIN_URL = "https://linkedin.com/yourpage"
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+

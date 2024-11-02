@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Manutenções para {{ selected_date|date:"d/m/Y" }}</h2>
+
+<!-- Exibe Mensagens de Sucesso -->
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Tabela de Manutenções -->
+<table class="maintenance-list">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Técnico</th>
+            <th>Data da Última Manutenção</th>
+            <th>Data Programada</th>
+            <th>Descrição</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for maintenance in page_obj %}
+            <tr class="
+                {% if maintenance.last_maintenance_date >= maintenance.maintenance_date %}
+                    completed
+                {% elif maintenance.maintenance_date >= today %}
+                    upcoming
+                {% else %}
+                    overdue
+                {% endif %}
+            ">
+                <td>{{ maintenance.item.name }}</td>
+                <td>{{ maintenance.technician.name }}</td>
+                <td>{{ maintenance.last_maintenance_date|date:"d/m/Y" }}</td>
+                <td>{{ maintenance.maintenance_date|date:"d/m/Y" }}</td>
+                <td>{{ maintenance.description }}</td>
+                <td>
+                    {% if maintenance.last_maintenance_date >= maintenance.maintenance_date %}
+                        Concluído
+                    {% elif maintenance.maintenance_date >= today %}
+                        Pendente
+                    {% else %}
+                        Atrasado
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">Nenhuma manutenção programada para este dia.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Paginação -->
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; primeiro</a>
+            <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+        {% endif %}
+
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">próximo</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">último &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+<a href="{% url 'maintenance_calendar' %}">Voltar para o calendário</a>
+
+<!-- Estilo para status -->
+<style>
+    .maintenance-list { width: 100%; border-collapse: collapse; }
+    .maintenance-list th, .maintenance-list td { padding: 10px; text-align: left; }
+    .maintenance-list .completed { background-color: #4CAF50; color: white; }
+    .maintenance-list .upcoming { background-color: #FFD700; color: black; }
+    .maintenance-list .overdue { background-color: #FF6347; color: white; }
+</style>
+
+{% endblock %}

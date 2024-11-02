@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" id="analysisForm">
+        {% csrf_token %}
+
+        <!-- Nome do Item (Exibido, mas desabilitado) -->
+        <div class="mb-3">
+            <label for="id_item" class="form-label">Item</label>
+            <input type="text" id="id_item" class="form-control" value="{{ analysis.item.name }}" disabled>
+        </div>
+
+        <!-- Metodologia (Exibida, mas desabilitada) -->
+        <div class="mb-3">
+            <label for="id_methodology" class="form-label">Metodologia</label>
+            <input type="text" id="id_methodology" class="form-control" value="{{ analysis.methodology.title }}" disabled>
+        </div>
+
+        <!-- Conformidade -->
+        <div class="mb-3">
+            <label for="id_conformity" class="form-label">Conformidade</label>
+            <select name="conformity" id="id_conformity" class="form-select" required>
+                <option value="">---------</option>
+                <option value="True" {% if form.conformity.value == "True" %}selected{% endif %}>Conforme</option>
+                <option value="False" {% if form.conformity.value == "False" %}selected{% endif %}>Não Conforme</option>
+            </select>
+            {% if form.conformity.errors %}
+                <div class="text-danger">{{ form.conformity.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Dynamic Field for Results (Name / Value or Text) -->
+        <div class="mb-3">
+            <label class="form-label">Resultados (Nome / Valor ou Texto)</label>
+            <div id="resultsContainer">
+                <!-- Dynamic pairs will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Hidden JSON field to store the compiled results -->
+        <input type="hidden" name="results" id="id_results">
+
+        <button type="submit" class="btn btn-primary">Salvar Análise</button>
+
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if analysis %}
+            <a href="{% url 'analysis:delete_analysis' analysis.id %}" class="btn btn-danger">Deletar Análise</a>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let resultsContainer = document.getElementById('resultsContainer');
+        let resultsField = document.getElementById('id_results');
+
+        // Add an initial field when the page loads
+        addField();
+
+        // Add new fields dynamically when existing ones are filled
+        resultsContainer.addEventListener('input', function (e) {
+            if (e.target.classList.contains('result-name') || e.target.classList.contains('result-value')) {
+                let allFields = document.querySelectorAll('.result-field-group');
+                let lastField = allFields[allFields.length - 1];
+                let nameField = lastField.querySelector('.result-name');
+                let valueField = lastField.querySelector('.result-value');
+
+                // Add a new field if the last pair is filled
+                if (nameField.value && valueField.value) {
+                    addField();
+                }
+            }
+        });
+
+        function addField() {
+            let fieldGroup = document.createElement('div');
+            fieldGroup.classList.add('mb-3', 'row', 'result-field-group');
+
+            let nameDiv = document.createElement('div');
+            nameDiv.classList.add('col-md-5');
+            let nameField = document.createElement('input');
+            nameField.type = 'text';
+            nameField.name = 'result_name';
+            nameField.placeholder = 'Nome do Resultado';
+            nameField.classList.add('form-control', 'result-name');
+            nameDiv.appendChild(nameField);
+
+            let valueDiv = document.createElement('div');
+            valueDiv.classList.add('col-md-5');
+            let valueField = document.createElement('input');
+            valueField.type = 'text';
+            valueField.name = 'result_value';
+            valueField.placeholder = 'Valor ou Texto do Resultado';
+            valueField.classList.add('form-control', 'result-value');
+            valueDiv.appendChild(valueField);
+
+            let removeButtonDiv = document.createElement('div');
+            removeButtonDiv.classList.add('col-md-2', 'd-flex', 'align-items-center');
+            let removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.classList.add('btn', 'btn-danger', 'w-100');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', function () {
+                resultsContainer.removeChild(fieldGroup);
+            });
+            removeButtonDiv.appendChild(removeButton);
+
+            fieldGroup.appendChild(nameDiv);
+            fieldGroup.appendChild(valueDiv);
+            fieldGroup.appendChild(removeButtonDiv);
+            resultsContainer.appendChild(fieldGroup);
+        }
+
+        // Before submitting the form, compile the results into a JSON array and store them in the hidden field
+        document.getElementById('analysisForm').addEventListener('submit', function (e) {
+            let resultPairs = [];
+            let nameFields = document.querySelectorAll('input[name="result_name"]');
+            let valueFields = document.querySelectorAll('input[name="result_value"]');
+
+            nameFields.forEach((nameField, index) => {
+                let name = nameField.value;
+                let value = valueFields[index].value;
+                if (name && value) {
+                    resultPairs.push({
+                        'name': name,
+                        'value': value
+                    });
+                }
+            });
+
+            // Convert the resultPairs array to JSON and store it in the hidden field
+            resultsField.value = JSON.stringify(resultPairs);
+        });
+    });
+</script>
+{% endblock %}

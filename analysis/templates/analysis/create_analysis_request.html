@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Título da Solicitação -->
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Título da Solicitação</label>
+            <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required>
+            {% if form.title.errors %}
+                <div class="text-danger">
+                    {{ form.title.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Empresa -->
+        <div class="mb-3">
+            <label for="id_company" class="form-label">Empresa</label>
+            <select name="company" id="id_company" class="form-select" required>
+                <option value="">---------</option>
+                {% for company in form.company.field.queryset %}
+                    <option value="{{ company.id }}" {% if form.company.value == company.id %}selected{% endif %}>
+                        {{ company.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.company.errors %}
+                <div class="text-danger">
+                    {{ form.company.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Solicitado por -->
+        <div class="mb-3">
+            <label for="id_requested_by" class="form-label">Solicitado por</label>
+            <select name="requested_by" id="id_requested_by" class="form-select" required>
+                <option value="">---------</option>
+                {% for user in form.requested_by.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.requested_by.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.requested_by.errors %}
+                <div class="text-danger">
+                    {{ form.requested_by.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Metodologias -->
+        <div class="mb-3">
+            <label for="id_methodologies" class="form-label">Metodologias</label>
+            <select name="methodologies" id="id_methodologies" class="form-select" multiple required>
+                {% for methodology in form.methodologies.field.queryset %}
+                    <option value="{{ methodology.id }}" {% if methodology.id in form.methodologies.value %}selected{% endif %}>
+                        {{ methodology.title }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.methodologies.errors %}
+                <div class="text-danger">
+                    {{ form.methodologies.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Comentários -->
+        <div class="mb-3">
+            <label for="id_comments" class="form-label">Comentários</label>
+            <textarea name="comments" id="id_comments" class="form-control">{{ form.comments.value|default:'' }}</textarea>
+            {% if form.comments.errors %}
+                <div class="text-danger">
+                    {{ form.comments.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Imagem da Amostra -->
+        <div class="mb-3">
+            <label for="id_sample_image" class="form-label">Imagem da Amostra</label>
+            <input type="file" name="sample_image" id="id_sample_image" class="form-control">
+            {% if form.sample_image.errors %}
+                <div class="text-danger">
+                    {{ form.sample_image.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Solicitação</button>
+    </form>
+</div>
+{% endblock %}

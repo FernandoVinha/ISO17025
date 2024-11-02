@@ -1,0 +1,92 @@
+<!-- templates/accounts/register.html -->
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Register</h2>
+    
+    <form method="POST" action="{% url 'register' token=token %}">
+        {% csrf_token %}
+
+        <!-- Exibir erro geral do formulário -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Primeiro Nome -->
+        <div class="mb-3">
+            <label for="id_first_name" class="form-label">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <div class="text-danger">
+                    {% for error in form.first_name.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Último Nome -->
+        <div class="mb-3">
+            <label for="id_last_name" class="form-label">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <div class="text-danger">
+                    {% for error in form.last_name.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {% for error in form.email.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Senha -->
+        <div class="mb-3">
+            <label for="id_password1" class="form-label">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <div class="text-danger">
+                    {% for error in form.password1.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div class="mb-3">
+            <label for="id_password2" class="form-label">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <div class="text-danger">
+                    {% for error in form.password2.errors %}
+                        <small>{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
+{% endblock %}

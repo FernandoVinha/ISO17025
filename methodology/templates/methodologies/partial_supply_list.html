@@ -1,0 +1,10 @@
+{% if supplies %}
+    <h3>Insumos para esta metodologia</h3>
+    <ul>
+        {% for supply in supplies %}
+            <li>{{ supply.quantity }} {{ supply.unit }} de {{ supply.supply.name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nenhum insumo foi adicionado a esta metodologia.</p>
+{% endif %}

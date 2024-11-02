@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Item Dropdown -->
+        <div class="mb-3">
+            <label for="id_item" class="form-label">Item</label>
+            <select name="item" id="id_item" class="form-select" required>
+                <option value="">---------</option>
+                {% for item in form.item.field.queryset %}
+                    <option value="{{ item.id }}" {% if form.item.value == item.id %}selected{% endif %}>
+                        {{ item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.item.errors %}
+                <div class="text-danger">
+                    {{ form.item.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Técnico Dropdown -->
+        <div class="mb-3">
+            <label for="id_technician" class="form-label">Técnico</label>
+            <select name="technician" id="id_technician" class="form-select" required>
+                <option value="">---------</option>
+                {% for technician in form.technician.field.queryset %}
+                    <option value="{{ technician.id }}" {% if form.technician.value == technician.id %}selected{% endif %}>
+                        {{ technician.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.technician.errors %}
+                <div class="text-danger">
+                    {{ form.technician.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data da Última Calibração -->
+        <div class="mb-3">
+            <label for="id_last_calibration_date" class="form-label">Data da Última Calibração</label>
+            <input type="date" name="last_calibration_date" id="id_last_calibration_date" class="form-control" value="{{ form.last_calibration_date.value|default:'' }}" required>
+            {% if form.last_calibration_date.errors %}
+                <div class="text-danger">
+                    {{ form.last_calibration_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Frequência de Calibração -->
+        <div class="mb-3">
+            <label for="id_frequency_months" class="form-label">Frequência de Calibração (Meses)</label>
+            <input type="number" name="frequency_months" id="id_frequency_months" class="form-control" value="{{ form.frequency_months.value|default:'' }}" required>
+            {% if form.frequency_months.errors %}
+                <div class="text-danger">
+                    {{ form.frequency_months.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Incerteza de Medição -->
+        <div class="mb-3">
+            <label for="id_measurement_uncertainty" class="form-label">Incerteza de Medição</label>
+            <input type="text" name="measurement_uncertainty" id="id_measurement_uncertainty" class="form-control" value="{{ form.measurement_uncertainty.value|default:'' }}" required>
+            {% if form.measurement_uncertainty.errors %}
+                <div class="text-danger">
+                    {{ form.measurement_uncertainty.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- SOP (Procedimento Operacional Padrão) -->
+        <div class="mb-3">
+            <label for="id_sop" class="form-label">SOP (Procedimento Operacional Padrão)</label>
+            <input type="file" name="sop" id="id_sop" class="form-control">
+            {% if form.sop.errors %}
+                <div class="text-danger">
+                    {{ form.sop.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Padrão de Calibração -->
+        <div class="mb-3">
+            <label for="id_standard" class="form-label">Padrão de Calibração</label>
+            <select name="standard" id="id_standard" class="form-select">
+                <option value="">---------</option>
+                {% for standard in form.standard.field.queryset %}
+                    <option value="{{ standard.id }}" {% if form.standard.value == standard.id %}selected{% endif %}>
+                        {{ standard.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.standard.errors %}
+                <div class="text-danger">
+                    {{ form.standard.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Relatório -->
+        <div class="mb-3">
+            <label for="id_report" class="form-label">Relatório</label>
+            <input type="file" name="report" id="id_report" class="form-control">
+            {% if form.report.errors %}
+                <div class="text-danger">
+                    {{ form.report.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'calibration_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

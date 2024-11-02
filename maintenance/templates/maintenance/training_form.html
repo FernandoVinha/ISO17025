@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Treinamentos{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Lista de Treinamentos</h2>
+
+    <!-- Formulário de Filtro -->
+    <form method="get" action=".">
+        {{ filter.form.as_p }}
+        <button type="submit" class="btn btn-primary mb-3">Filtrar</button>
+    </form>
+
+    <!-- Exibe Mensagens de Sucesso -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Tabela de Treinamentos -->
+    <table class="training-list">
+        <thead>
+            <tr>
+                <th>Contato</th>
+                <th>Nome do Treinamento</th>
+                <th>Data de Conclusão</th>
+                <th>Descrição</th>
+                <th>Documento de Certificação</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for training in page_obj %}
+                <tr class="{% if training.date_completed %}completed{% else %}pending{% endif %}">
+                    <td>{{ training.contact.name }}</td>
+                    <td>{{ training.training_name }}</td>
+                    <td>{{ training.date_completed|date:"d/m/Y" }}</td>
+                    <td>{{ training.description }}</td>
+                    <td>
+                        {% if training.certification_document %}
+                            <a href="{{ training.certification_document.url }}" target="_blank">Ver Documento</a>
+                        {% else %}
+                            Não disponível
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if training.date_completed %}
+                            Concluído
+                        {% else %}
+                            Pendente
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Nenhum treinamento encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginação -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; primeiro</a>
+                <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+            {% endif %}
+
+            <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">próximo</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">último &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Estilos para o Status -->
+<style>
+    .training-list { width: 100%; border-collapse: collapse; }
+    .training-list th, .training-list td { padding: 10px; text-align: left; }
+    .training-list .completed { background-color: #4CAF50; color: white; }
+    .training-list .pending { background-color: #FFD700; color: black; }
+    .pagination { margin-top: 20px; }
+</style>
+
+{% endblock %}

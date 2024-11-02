@@ -1,34 +1,29 @@
 # accounts/context_processors.py
-from django.contrib.auth.models import Permission
+
+from django.apps import apps
 from django.conf import settings
 
 def user_permissions(request):
     permissions = {}
 
     if request.user.is_authenticated:
-        # Permissões existentes
-        permissions['can_access_samplereception'] = request.user.has_perm('app_label.can_access_samplereception')
-        permissions['can_access_samplestorage'] = request.user.has_perm('app_label.can_access_samplestorage')
-        permissions['can_access_sampleanalysis'] = request.user.has_perm('app_label.can_access_sampleanalysis')
-        permissions['can_access_analysisreport'] = request.user.has_perm('app_label.can_access_analysisreport')
-        permissions['can_view_companies'] = request.user.has_perm('accounts.view_companies')
-        permissions['can_view_contacts'] = request.user.has_perm('accounts.view_contacts')
-        permissions['can_generate_invite'] = request.user.has_perm('accounts.can_generate_invite')
+        # Itera sobre todos os apps instalados
+        for app_config in apps.get_app_configs():
+            app_label = app_config.label
+            # Adiciona permissões específicas para cada app no contexto
+            permissions[f'can_view_{app_label}'] = request.user.has_perm(f'{app_label}.view_{app_label}')
+            permissions[f'can_add_{app_label}'] = request.user.has_perm(f'{app_label}.add_{app_label}')
+            permissions[f'can_change_{app_label}'] = request.user.has_perm(f'{app_label}.change_{app_label}')
+            permissions[f'can_delete_{app_label}'] = request.user.has_perm(f'{app_label}.delete_{app_label}')
 
-        # Novas permissões para Locations
-        permissions['can_view_building'] = request.user.has_perm('locations.view_building')
-        permissions['can_view_room'] = request.user.has_perm('locations.view_room')
-        permissions['can_view_measurement'] = request.user.has_perm('locations.view_measurement')
-        # Adicione outras permissões de Locations conforme necessário
-
-    # Informações do usuário
+    # Informações do usuário logado
     user_info = {
         'full_name': request.user.get_full_name(),
         'email': request.user.email,
         'role': getattr(request.user, 'role', None),
     } if request.user.is_authenticated else {}
 
-    # Informações do projeto
+    # Informações sobre o projeto
     project_info = {
         'project_name': getattr(settings, 'PROJECT_NAME', 'ISO17025 Project'),
         'contact_email': getattr(settings, 'CONTACT_EMAIL', 'contact@example.com'),

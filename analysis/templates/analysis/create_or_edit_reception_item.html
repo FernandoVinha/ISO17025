@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data" id="receptionItemForm">
+        {% csrf_token %}
+
+        <!-- Nome do Item -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome do Item</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Número de Série -->
+        <div class="mb-3">
+            <label for="id_serial_number" class="form-label">Número de Série</label>
+            <input type="text" name="serial_number" id="id_serial_number" class="form-control" value="{{ form.serial_number.value|default:'' }}">
+            {% if form.serial_number.errors %}
+                <div class="text-danger">{{ form.serial_number.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Peso -->
+        <div class="mb-3">
+            <label for="id_weight" class="form-label">Peso (kg)</label>
+            <input type="number" name="weight" id="id_weight" class="form-control" value="{{ form.weight.value|default:'' }}" step="0.01">
+            {% if form.weight.errors %}
+                <div class="text-danger">{{ form.weight.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Imagem da Amostra -->
+        <div class="mb-3">
+            <label for="id_sample_image" class="form-label">Imagem da Amostra</label>
+            <input type="file" name="sample_image" id="id_sample_image" class="form-control">
+            {% if form.sample_image.errors %}
+                <div class="text-danger">{{ form.sample_image.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Data de Envio -->
+        <div class="mb-3">
+            <label for="id_shipment_date" class="form-label">Data de Envio</label>
+            <input type="date" name="shipment_date" id="id_shipment_date" class="form-control" value="{{ form.shipment_date.value|default:'' }}">
+            {% if form.shipment_date.errors %}
+                <div class="text-danger">{{ form.shipment_date.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Local de Envio -->
+        <div class="mb-3">
+            <label for="id_shipment_location" class="form-label">Local de Envio</label>
+            <input type="text" name="shipment_location" id="id_shipment_location" class="form-control" value="{{ form.shipment_location.value|default:'' }}">
+            {% if form.shipment_location.errors %}
+                <div class="text-danger">{{ form.shipment_location.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Máximo de Dias para o Resultado -->
+        <div class="mb-3">
+            <label for="id_max_days_for_result" class="form-label">Máximo de Dias para o Resultado</label>
+            <input type="number" name="max_days_for_result" id="id_max_days_for_result" class="form-control" value="{{ form.max_days_for_result.value|default:'' }}">
+            {% if form.max_days_for_result.errors %}
+                <div class="text-danger">{{ form.max_days_for_result.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Condição do Item -->
+        <div class="mb-3">
+            <label for="id_condition" class="form-label">Condição do Item</label>
+            <textarea name="condition" id="id_condition" class="form-control" required>{{ form.condition.value|default:'' }}</textarea>
+            {% if form.condition.errors %}
+                <div class="text-danger">{{ form.condition.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Item de Recepção</button>
+
+        <!-- Botão de Deletar (apenas para edição) -->
+        {% if reception_item %}
+            <a href="{% url 'analysis:delete_reception_item' reception_item.id %}" class="btn btn-danger">Deletar Item</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

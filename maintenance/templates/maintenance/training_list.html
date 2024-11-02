@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Contato Dropdown -->
+        <div class="mb-3">
+            <label for="id_contact" class="form-label">Contato</label>
+            <select name="contact" id="id_contact" class="form-select" required>
+                <option value="">---------</option>
+                {% for contact in form.contact.field.queryset %}
+                    <option value="{{ contact.id }}" {% if form.contact.value == contact.id %}selected{% endif %}>
+                        {{ contact.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.contact.errors %}
+                <div class="text-danger">
+                    {{ form.contact.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Nome do Treinamento -->
+        <div class="mb-3">
+            <label for="id_training_name" class="form-label">Nome do Treinamento</label>
+            <input type="text" name="training_name" id="id_training_name" class="form-control" value="{{ form.training_name.value|default:'' }}" required>
+            {% if form.training_name.errors %}
+                <div class="text-danger">
+                    {{ form.training_name.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data de Conclusão -->
+        <div class="mb-3">
+            <label for="id_date_completed" class="form-label">Data de Conclusão</label>
+            <input type="date" name="date_completed" id="id_date_completed" class="form-control" value="{{ form.date_completed.value|default:'' }}">
+            {% if form.date_completed.errors %}
+                <div class="text-danger">
+                    {{ form.date_completed.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Descrição -->
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Descrição</label>
+            <textarea name="description" id="id_description" class="form-control" rows="3">{{ form.description.value }}</textarea>
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {{ form.description.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Documento de Certificação -->
+        <div class="mb-3">
+            <label for="id_certification_document" class="form-label">Documento de Certificação</label>
+            <input type="file" name="certification_document" id="id_certification_document" class="form-control">
+            {% if form.certification_document.errors %}
+                <div class="text-danger">
+                    {{ form.certification_document.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'training_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

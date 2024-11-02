@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Título -->
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Título</label>
+            <input type="text" name="title" id="id_title" class="form-control" value="{{ form.title.value|default:'' }}" required>
+            {% if form.title.errors %}
+                <div class="text-danger">
+                    {{ form.title.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Descrição -->
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Descrição</label>
+            <textarea name="description" id="id_description" class="form-control" rows="4">{{ form.description.value }}</textarea>
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {{ form.description.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Documento -->
+        <div class="mb-3">
+            <label for="id_document" class="form-label">Documento</label>
+            <input type="file" name="document" id="id_document" class="form-control">
+            {% if form.document.errors %}
+                <div class="text-danger">
+                    {{ form.document.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'sop_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

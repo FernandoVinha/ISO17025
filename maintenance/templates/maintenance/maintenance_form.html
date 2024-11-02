@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Item Dropdown -->
+        <div class="mb-3">
+            <label for="id_item" class="form-label">Item</label>
+            <select name="item" id="id_item" class="form-select" required>
+                <option value="">---------</option>
+                {% for item in form.item.field.queryset %}
+                    <option value="{{ item.id }}" {% if form.item.value == item.id %}selected{% endif %}>
+                        {{ item.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.item.errors %}
+                <div class="text-danger">
+                    {{ form.item.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Técnico Dropdown -->
+        <div class="mb-3">
+            <label for="id_technician" class="form-label">Técnico</label>
+            <select name="technician" id="id_technician" class="form-select" required>
+                <option value="">---------</option>
+                {% for technician in form.technician.field.queryset %}
+                    <option value="{{ technician.id }}" {% if form.technician.value == technician.id %}selected{% endif %}>
+                        {{ technician.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.technician.errors %}
+                <div class="text-danger">
+                    {{ form.technician.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Data da Última Manutenção -->
+        <div class="mb-3">
+            <label for="id_last_maintenance_date" class="form-label">Data da Última Manutenção</label>
+            <input type="date" name="last_maintenance_date" id="id_last_maintenance_date" class="form-control" value="{{ form.last_maintenance_date.value|default:'' }}" required>
+            {% if form.last_maintenance_date.errors %}
+                <div class="text-danger">
+                    {{ form.last_maintenance_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Frequência de Manutenção -->
+        <div class="mb-3">
+            <label for="id_frequency_months" class="form-label">Frequência de Manutenção (Meses)</label>
+            <input type="number" name="frequency_months" id="id_frequency_months" class="form-control" value="{{ form.frequency_months.value|default:'' }}" required>
+            {% if form.frequency_months.errors %}
+                <div class="text-danger">
+                    {{ form.frequency_months.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Descrição -->
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Descrição</label>
+            <textarea name="description" id="id_description" class="form-control" rows="3">{{ form.description.value }}</textarea>
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {{ form.description.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- SOP (Procedimento Operacional Padrão) -->
+        <div class="mb-3">
+            <label for="id_sop" class="form-label">SOP (Procedimento Operacional Padrão)</label>
+            <input type="file" name="sop" id="id_sop" class="form-control">
+            {% if form.sop.errors %}
+                <div class="text-danger">
+                    {{ form.sop.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Relatório -->
+        <div class="mb-3">
+            <label for="id_report" class="form-label">Relatório</label>
+            <input type="file" name="report" id="id_report" class="form-control">
+            {% if form.report.errors %}
+                <div class="text-danger">
+                    {{ form.report.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
+        <a href="{% url 'maintenance_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

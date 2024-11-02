@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Aferições Diárias{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Lista de Aferições Diárias</h2>
+
+    <!-- Formulário de pesquisa -->
+    <div class="d-flex justify-content-between mb-3">
+        <form method="GET" action="">
+            <div class="form-group">
+                <input type="text" name="email" placeholder="Pesquisar por email do usuário" class="form-control" value="{{ request.GET.email }}">
+            </div>
+            <div class="form-group mt-2">
+                <input type="date" name="date" placeholder="Pesquisar por data" class="form-control" value="{{ request.GET.date }}">
+            </div>
+            <div class="form-group mt-2">
+                <input type="text" name="equipment" placeholder="Pesquisar por equipamento" class="form-control" value="{{ request.GET.equipment }}">
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Pesquisar</button>
+        </form>
+        <a href="{% url 'daily_verification_create' %}" class="btn btn-success">Adicionar Aferição Diária</a>
+    </div>
+
+    <!-- Verifique se há registros para exibir -->
+    {% if page_obj %}
+        <table class="table table-striped daily-verification-list">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Item</th>
+                    <th>Data da Aferição</th>
+                    <th>Aferições Realizadas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for verification in page_obj %}
+                    <tr>
+                        <td>{{ verification.user.get_full_name }}</td>
+                        <td>{{ verification.item.name }}</td>
+                        <td>{{ verification.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <pre>{{ verification.measurements|json_script:"safe" }}</pre> <!-- Exibe JSON de maneira formatada -->
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">Nenhuma aferição diária encontrada.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Paginação -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; primeiro</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">anterior</a>
+                {% endif %}
+
+                <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">próximo</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">último &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% else %}
+        <p>Nenhuma aferição disponível para exibição.</p>
+    {% endif %}
+</div>
+{% endblock %}
