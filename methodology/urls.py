@@ -1,5 +1,8 @@
+# methodology/urls.py
 from django.urls import path
 from .views import methodology_list, methodology_edit_or_view, methodology_create, methodology_delete, methodology_supply_delete
+
+app_name = 'methodologies'  # Add this line to define the namespace
 
 urlpatterns = [
     path('methodologies/', methodology_list, name='methodology_list'),

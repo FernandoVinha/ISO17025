@@ -9,12 +9,12 @@ from ..filters import AnalysisRequestFilter
 # ====== View para listar os pedidos de análise ======
 @login_required
 def analysis_request_list(request):
-    if request.user.role == 'employee' and hasattr(request.user, 'company'):
-        # Funcionários podem ver todos os pedidos de análise da sua empresa
-        analysis_requests = AnalysisRequest.objects.filter(company=request.user.company)
-        messages.info(request, "Você está visualizando todos os pedidos de análise da sua empresa.")
+    if request.user.role == 'employee':
+        # Funcionários podem ver todos os pedidos de análise feitos por eles
+        analysis_requests = AnalysisRequest.objects.filter(requested_by=request.user)
+        messages.info(request, "Você está visualizando todos os pedidos de análise feitos por você.")
     else:
-        # Outros usuários só podem ver os pedidos feitos por eles
+        # Outros usuários só podem ver os pedidos que eles mesmos fizeram
         analysis_requests = AnalysisRequest.objects.filter(requested_by=request.user)
         messages.info(request, "Você está visualizando os pedidos de análise feitos por você.")
 
@@ -54,11 +54,10 @@ def delete_analysis_request(request, pk):
     analysis_request = get_object_or_404(AnalysisRequest, pk=pk)
 
     # Verifica se o usuário tem permissão para deletar o pedido
-    if request.user != analysis_request.requested_by:
-        if request.user.role != 'employee' or request.user.company != analysis_request.company:
-            # Se o usuário não for o autor ou não for um funcionário da mesma empresa, negar acesso
-            messages.error(request, "Você não tem permissão para deletar este pedido de análise.")
-            raise PermissionDenied("Você não tem permissão para deletar este pedido de análise.")
+    if request.user != analysis_request.requested_by and request.user.role != 'admin':
+        # Se o usuário não for o autor do pedido e não for um administrador, negar acesso
+        messages.error(request, "Você não tem permissão para deletar este pedido de análise.")
+        raise PermissionDenied("Você não tem permissão para deletar este pedido de análise.")
 
     if request.method == 'POST':
         analysis_request.delete()

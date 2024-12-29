@@ -1,0 +1,22 @@
+<!-- accounts_dropdown.html -->
+{% if permissions.can_view_companies or permissions.can_view_contacts or permissions.can_view_relationshiptype or user.is_superuser %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="accountsDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            Accounts
+        </a>
+        
+        <ul class="dropdown-menu" aria-labelledby="accountsDropdown">
+            {% if permissions.can_view_companies %}
+                <li><a class="dropdown-item" href="{% url 'accounts:accounts_list' %}">View Accounts</a></li>
+            {% endif %}
+            {% if permissions.can_view_profile %}
+                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Update Profile</a></li>
+            {% endif %}
+            {% if user.is_superuser %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'accounts:invite_user' %}">Invite User</a></li>
+            {% endif %}
+        </ul>
+    </li>
+{% endif %}

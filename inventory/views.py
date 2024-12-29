@@ -1,88 +1,115 @@
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib import messages
+# inventory/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.core.paginator import Paginator
+from django.urls import reverse
+from django.http import JsonResponse
 from .models import InventoryItem
 from .forms import InventoryItemForm
 from .filters import InventoryItemFilter
+from simple_history.utils import update_change_reason
 
 # ====== InventoryItem Views ======
 
 @login_required
-@permission_required('locations.view_inventoryitem', raise_exception=True)
+@permission_required('inventory.can_view_inventoryitem', raise_exception=True)
 def inventoryitem_list(request):
     """
-    Display a list of all inventory items with optional search and filter functionality.
-    Items with expiration dates are listed first, followed by those without.
+    Exibe uma lista paginada de InventoryItems com funcionalidade de filtro.
     """
     inventory_items = InventoryItem.objects.all()
-    
+
     # Aplicar filtros
     inventory_filter = InventoryItemFilter(request.GET, queryset=inventory_items)
     inventory_items = inventory_filter.qs
 
-    # Ordenar os itens: primeiros com data de validade e depois os sem
-    inventory_items = sorted(inventory_items, key=lambda x: (x.expiration_date is None, x.expiration_date))
+    # Ordenar itens por data de expiração (itens sem data de expiração aparecem no final)
+    inventory_items = inventory_items.order_by('expiration_date')
+
+    # Paginar os itens de inventário
+    paginator = Paginator(inventory_items, 50)  # 50 itens por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'inventory/inventoryitem_list.html', {
-        'inventory_items': inventory_items,
+        'inventory_items': page_obj,
         'filter': inventory_filter,
+        'page_obj': page_obj,
+        # Evitar passar o histórico diretamente para o template para otimizar performance
     })
 
+
 @login_required
-@permission_required('locations.add_inventoryitem', raise_exception=True)
+@permission_required('inventory.can_add_inventoryitem', raise_exception=True)
 def inventoryitem_create(request):
     """
-    Handle the creation of a new inventory item.
+    Trata a criação de um novo InventoryItem.
+    O botão de exclusão não estará disponível nesta view.
     """
     if request.method == 'POST':
         form = InventoryItemForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Inventory item created successfully!")
-            return redirect('inventoryitem_list')
+            inventory_item = form.save()
+            update_change_reason(inventory_item, f"Item adicionado por {request.user.get_full_name()}")
+            messages.success(request, "Inventory item criado com sucesso!")
+            return redirect('inventory:inventoryitem_list')  # URL com namespace correto
     else:
         form = InventoryItemForm()
+
     return render(request, 'inventory/inventoryitem_form.html', {
         'form': form,
-        'title': 'Add Inventory Item',
-        'button_label': 'Save'
+        'title': 'Adicionar Inventory Item',
+        'button_label': 'Salvar',
+        'inventory_item': None,  # Indicando criação
     })
 
+
 @login_required
-@permission_required('locations.change_inventoryitem', raise_exception=True)
+@permission_required('inventory.can_change_inventoryitem', raise_exception=True)
 def inventoryitem_edit(request, pk):
     """
-    Handle the editing of an existing inventory item.
+    Trata a edição de um InventoryItem existente.
+    O botão de exclusão estará disponível nesta view.
     """
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
     if request.method == 'POST':
         form = InventoryItemForm(request.POST, request.FILES, instance=inventory_item)
         if form.is_valid():
             form.save()
-            messages.success(request, "Inventory item updated successfully!")
-            return redirect('inventoryitem_list')
+            update_change_reason(inventory_item, f"Item atualizado por {request.user.get_full_name()}")
+            messages.success(request, "Inventory item atualizado com sucesso!")
+            return redirect('inventory:inventoryitem_list')  # URL com namespace correto
     else:
         form = InventoryItemForm(instance=inventory_item)
+
     return render(request, 'inventory/inventoryitem_form.html', {
         'form': form,
         'inventory_item': inventory_item,
-        'title': 'Edit Inventory Item',
-        'button_label': 'Update'
+        'title': 'Editar Inventory Item',
+        'button_label': 'Atualizar',
+        'simple_history': inventory_item.history.all()[:30],  # Exibe o histórico (opcional)
     })
 
+
 @login_required
-@permission_required('locations.delete_inventoryitem', raise_exception=True)
+@permission_required('inventory.can_delete_inventoryitem', raise_exception=True)
 def inventoryitem_delete(request, pk):
     """
-    Handle the deletion of an existing inventory item.
+    Trata a exclusão de um InventoryItem existente.
     """
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
+
     if request.method == 'POST':
+        update_change_reason(inventory_item, f"Item deletado por {request.user.get_full_name()}")
         inventory_item.delete()
-        messages.success(request, "Inventory item deleted successfully!")
-        return redirect('inventoryitem_list')
+        messages.success(request, "Inventory item deletado com sucesso!")
+        return redirect('inventory:inventoryitem_list')  # Redireciona para a lista após a exclusão
+
     return render(request, 'confirm_delete.html', {
         'item_name': inventory_item.name,
-        'delete_url': request.path,
-        'cancel_url': 'inventoryitem_list'
+        'delete_url': reverse('inventory:inventoryitem_delete', args=[inventory_item.id]),
+        'cancel_url': reverse('inventory:inventoryitem_list'),
+        'simple_history': inventory_item.history.all()[:30],  # Exibe o histórico (opcional)
     })

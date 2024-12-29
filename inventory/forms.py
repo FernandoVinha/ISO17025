@@ -1,3 +1,4 @@
+# inventory/forms.py
 from django import forms
 from .models import InventoryItem
 
@@ -22,4 +23,5 @@ class InventoryItemForm(forms.ModelForm):
         widgets = {
             'manufacturing_date': forms.DateInput(attrs={'type': 'date'}),
             'expiration_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
         }

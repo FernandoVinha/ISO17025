@@ -23,7 +23,7 @@
     {% if can_edit %}
         <hr>
         <h4>Add Supplies</h4>
-        <form id="supply-form" method="POST" action="{% url 'methodology_supply_add' methodology.pk %}">
+        <form id="supply-form" method="POST" action="{% url 'methodologies:methodology_supply_add' methodology.pk %}">
             {% csrf_token %}
             {{ supply_form.as_p }}
             <button type="submit" class="btn btn-success">Add Supply</button>
@@ -36,6 +36,13 @@
     <div id="supply-list">
         {% include 'methodologies/partial_supply_list.html' %}
     </div>
+
+    <!-- Delete Item Button with Trash Icon (only for editing) -->
+    {% if inventory_item %}
+        <a href="{% url 'inventory:inventoryitem_delete' inventory_item.id %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Delete Item
+        </a>
+    {% endif %}
 </div>
 
 <!-- AJAX Script for Adding and Deleting Supplies -->
@@ -50,9 +57,14 @@
             data: form.serialize(),
             success: function(response) {
                 if (response.success) {
-                    $('#supply-list').html(response.html); // Update the supply list
+                    $('#supply-list').html(response.html); // Update the supply list dynamically
                     form.trigger('reset'); // Reset the form
+                } else {
+                    alert('There was an error adding the supply.');
                 }
+            },
+            error: function() {
+                alert('An error occurred while submitting the form.');
             }
         });
     });
@@ -61,15 +73,20 @@
     $('#supply-list').on('click', '.delete-supply', function() {
         const supplyId = $(this).data('id');
         $.ajax({
-            url: `/methodology/supply/delete/${supplyId}/`,
+            url: `/methodology/supply/delete/${supplyId}/`,  // Ensure the URL is correct for deleting the supply
             type: 'POST',
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             success: function(response) {
                 if (response.success) {
-                    $('#supply-list').html(response.html); // Update the supply list
+                    $('#supply-list').html(response.html); // Update the supply list dynamically after deletion
+                } else {
+                    alert('There was an error deleting the supply.');
                 }
+            },
+            error: function() {
+                alert('An error occurred while trying to delete the supply.');
             }
         });
     });

@@ -1,92 +1,103 @@
-<!-- templates/accounts/register.html -->
-{% extends 'base.html' %}
+<!-- accounts/templates/accounts/register.html -->
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Registro{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Register</h2>
-    
-    <form method="POST" action="{% url 'register' token=token %}">
+    <h2>Registro</h2>
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Exibir erro geral do formulário -->
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <!-- Primeiro Nome -->
+        <!-- Nome -->
         <div class="mb-3">
-            <label for="id_first_name" class="form-label">First Name</label>
-            {{ form.first_name }}
+            <label for="id_first_name" class="form-label">Nome</label>
+            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ form.first_name.value|default:'' }}" required>
             {% if form.first_name.errors %}
                 <div class="text-danger">
-                    {% for error in form.first_name.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.first_name.errors }}
                 </div>
             {% endif %}
         </div>
 
-        <!-- Último Nome -->
+        <!-- Sobrenome -->
         <div class="mb-3">
-            <label for="id_last_name" class="form-label">Last Name</label>
-            {{ form.last_name }}
+            <label for="id_last_name" class="form-label">Sobrenome</label>
+            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ form.last_name.value|default:'' }}" required>
             {% if form.last_name.errors %}
                 <div class="text-danger">
-                    {% for error in form.last_name.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.last_name.errors }}
                 </div>
             {% endif %}
         </div>
 
-        <!-- Email -->
+        <!-- Email (preenchido automaticamente) -->
         <div class="mb-3">
             <label for="id_email" class="form-label">Email</label>
-            {{ form.email }}
+            <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value|default:'' }}" readonly>
             {% if form.email.errors %}
                 <div class="text-danger">
-                    {% for error in form.email.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.email.errors }}
                 </div>
             {% endif %}
         </div>
 
         <!-- Senha -->
         <div class="mb-3">
-            <label for="id_password1" class="form-label">Password</label>
-            {{ form.password1 }}
+            <label for="id_password1" class="form-label">Senha</label>
+            <input type="password" name="password1" id="id_password1" class="form-control" required>
             {% if form.password1.errors %}
                 <div class="text-danger">
-                    {% for error in form.password1.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.password1.errors }}
                 </div>
             {% endif %}
         </div>
 
         <!-- Confirmar Senha -->
         <div class="mb-3">
-            <label for="id_password2" class="form-label">Confirm Password</label>
-            {{ form.password2 }}
+            <label for="id_password2" class="form-label">Confirmar Senha</label>
+            <input type="password" name="password2" id="id_password2" class="form-control" required>
             {% if form.password2.errors %}
                 <div class="text-danger">
-                    {% for error in form.password2.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.password2.errors }}
                 </div>
             {% endif %}
         </div>
-        
-        <button type="submit" class="btn btn-primary">Register</button>
+
+        <!-- Papel (role) (preenchido automaticamente ou oculto) -->
+        {% if form.role %}
+            <div class="mb-3">
+                <label for="id_role" class="form-label">Papel</label>
+                <select name="role" id="id_role" class="form-select" required>
+                    <option value="">---------</option>
+                    {% for value, label in form.role.field.choices %}
+                        <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form.role.errors %}
+                    <div class="text-danger">
+                        {{ form.role.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Botão de Registro -->
+        <button type="submit" class="btn btn-primary">Registrar</button>
     </form>
+
+    <!-- Mensagens de Erro -->
+    {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

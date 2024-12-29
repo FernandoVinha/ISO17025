@@ -1,0 +1,21 @@
+.user-image img {
+    width: 50px; /* Tamanho da imagem */
+    height: 50px; /* Tamanho da imagem */
+    object-fit: cover; /* Garante que a imagem se ajuste corretamente */
+    border-radius: 50%; /* Torna a imagem redonda */
+    border: 2px solid #ccc; /* Adiciona uma borda ao redor */
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 70px;
+    }
+    .navbar-brand {
+        font-size: 30px;
+    }
+}
+
+
+body {
+    padding-top: 56px; /* Ajuste conforme necessário */
+}

@@ -2,7 +2,7 @@
 
 from django.db import models
 from django.apps import apps
-from django.contrib.auth.models import User
+from accounts.models import CustomUser
 from django.utils.translation import gettext_lazy as _
 
 def get_installed_apps():
@@ -22,7 +22,7 @@ class NonConformity(models.Model):
     description = models.TextField(verbose_name=_("Description"))
     photo = models.ImageField(upload_to='nonconformity_photos/', blank=True, null=True, verbose_name=_("Photo"))
     created_at = models.DateTimeField(auto_now_add=True)  # Data de criação
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("Created By"))  # Usuário que criou
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name=_("Created By"))  # Usuário que criou
 
     def __str__(self):
         app_display = self.get_app_display() or "No App"

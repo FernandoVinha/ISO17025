@@ -1,65 +1,91 @@
-{% extends 'base.html' %}
+<!-- accounts/templates/accounts/profile_update.html -->
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Update Profile{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Edit Profile</h2>
-    
-    <form method="POST" enctype="multipart/form-data" action="{% url 'profile' %}">
+    <h2>Update Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Exibir erro geral do formulário -->
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
-        <!-- Primeiro Nome -->
+        <!-- First Name -->
         <div class="mb-3">
             <label for="id_first_name" class="form-label">First Name</label>
-            {{ form.first_name }}
+            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ form.first_name.value|default_if_none:'' }}" required>
             {% if form.first_name.errors %}
                 <div class="text-danger">
-                    {% for error in form.first_name.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.first_name.errors }}
                 </div>
             {% endif %}
         </div>
 
-        <!-- Último Nome -->
+        <!-- Last Name -->
         <div class="mb-3">
             <label for="id_last_name" class="form-label">Last Name</label>
-            {{ form.last_name }}
+            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ form.last_name.value|default_if_none:'' }}" required>
             {% if form.last_name.errors %}
                 <div class="text-danger">
-                    {% for error in form.last_name.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.last_name.errors }}
                 </div>
             {% endif %}
         </div>
 
-        <!-- Foto de Perfil -->
+        <!-- Profile Image -->
         <div class="mb-3">
             <label for="id_profile_image" class="form-label">Profile Image</label>
-            {{ form.profile_image }}
+            <input type="file" name="profile_image" id="id_profile_image" class="form-control">
             {% if form.profile_image.errors %}
                 <div class="text-danger">
-                    {% for error in form.profile_image.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.profile_image.errors }}
+                </div>
+            {% endif %}
+            {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="img-fluid mt-3" style="max-width: 200px;">
+            {% endif %}
+        </div>
+
+        <!-- Email (Read-Only) -->
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            <input type="email" name="email" id="id_email" class="form-control" value="{{ user.email }}" readonly>
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {{ form.email.errors }}
                 </div>
             {% endif %}
         </div>
-        
-        <button type="submit" class="btn btn-primary">Update Profile</button>
+
+        <!-- Role (Read-Only) -->
+        <div class="mb-3">
+            <label for="id_role" class="form-label">Role</label>
+            <select name="role" id="id_role" class="form-select" disabled>
+                {% for value, label in form.role.field.choices %}
+                    <option value="{{ value }}" {% if user.role == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.role.errors %}
+                <div class="text-danger">
+                    {{ form.role.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center mt-4 gap-3">
+            <!-- Save Button with Clipboard Check Icon -->
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-clipboard-check"></i>
+            </button>
+
+            <!-- Cancel Button with Arrow Left Icon -->
+            <a href="{% url 'home' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
     </form>
 </div>
 {% endblock %}

@@ -1,86 +1,63 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser, RelationshipType, Invitation
 
-# ====== Custom User Forms ======
 
-class CustomUserCreationForm(UserCreationForm):
+class AccountEditForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
-    
-    # Validação customizada para garantir que o primeiro e o último nome estejam preenchidos
-    def clean_first_name(self):
-        first_name = self.cleaned_data.get('first_name')
-        if not first_name:
-            raise forms.ValidationError("First name is required.")
-        return first_name
-
-    def clean_last_name(self):
-        last_name = self.cleaned_data.get('last_name')
-        if not last_name:
-            raise forms.ValidationError("Last name is required.")
-        return last_name
-
-class CustomUserChangeForm(UserChangeForm):
-    class Meta:
-        model = CustomUser
-        fields = ('first_name', 'last_name', 'email', 'role')
-        error_messages = {
-            'email': {
-                'unique': "This email is already in use.",
-            },
+        fields = ['email', 'first_name', 'last_name', 'role', 'profile_image', 'is_active', 'is_staff']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'role': forms.Select(attrs={'class': 'form-select'}),
+            'profile_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_staff': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
-# ====== RelationshipType Form ======
 
 class RelationshipTypeForm(forms.ModelForm):
     class Meta:
         model = RelationshipType
         fields = ['name']
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Enter Relationship Type'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
         }
 
-
-# ====== Invitation Form ======
 
 class InvitationForm(forms.ModelForm):
     class Meta:
         model = Invitation
-        fields = ['email']
+        fields = ['email', 'role']
         widgets = {
-            'email': forms.EmailInput(attrs={'placeholder': 'Enter email for invitation'}),
-        }
-        error_messages = {
-            'email': {
-                'unique': "An invitation for this email already exists.",
-                'invalid': "Enter a valid email address.",
-            },
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'required': True}),
+            'role': forms.Select(attrs={'class': 'form-select', 'required': True}),
         }
 
-# ====== Profile Update Form ======
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    role = forms.ChoiceField(choices=CustomUser.ROLE_CHOICES, required=True, widget=forms.Select(attrs={'class': 'form-select'}))
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'role', 'password1', 'password2']
+        widgets = {
+            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'required': True}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'required': True}),
+        }
+
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name', 'profile_image']
         widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'Enter First Name'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Enter Last Name'}),
-            'profile_image': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'profile_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
-        error_messages = {
-            'first_name': {
-                'required': "First name is required.",
-            },
-            'last_name': {
-                'required': "Last name is required.",
-            },
-        }
-
-    def clean_profile_image(self):
-        image = self.cleaned_data.get('profile_image')
-        if image and image.size > 5 * 1024 * 1024:  # 5MB limit
-            raise forms.ValidationError("Image file too large ( > 5MB ).")
-        return image

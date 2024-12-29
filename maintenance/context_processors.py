@@ -4,19 +4,28 @@ def maintenance_permissions(request):
     permissions = {}
 
     if request.user.is_authenticated:
-        permissions['can_view_maintenance'] = request.user.has_perm('maintenance.can_view_maintenance')
-        permissions['can_add_maintenance'] = request.user.has_perm('maintenance.can_add_maintenance')
-        permissions['can_change_maintenance'] = request.user.has_perm('maintenance.can_change_maintenance')
-        permissions['can_delete_maintenance'] = request.user.has_perm('maintenance.can_delete_maintenance')
-        permissions['can_view_calibration'] = request.user.has_perm('maintenance.can_view_calibration')
-        permissions['can_add_calibration'] = request.user.has_perm('maintenance.can_add_calibration')
-        permissions['can_change_calibration'] = request.user.has_perm('maintenance.can_change_calibration')
-        permissions['can_delete_calibration'] = request.user.has_perm('maintenance.can_delete_calibration')
-        permissions['can_view_calibrationstandard'] = request.user.has_perm('maintenance.can_view_calibrationstandard')
-        permissions['can_add_calibrationstandard'] = request.user.has_perm('maintenance.can_add_calibrationstandard')
-        permissions['can_change_calibrationstandard'] = request.user.has_perm('maintenance.can_change_calibrationstandard')
-        permissions['can_delete_calibrationstandard'] = request.user.has_perm('maintenance.can_delete_calibrationstandard')
+        # Define modelos e ações de forma programática
+        models_permissions = {
+            'Maintenance': ['view', 'add', 'change', 'delete'],
+            'Calibration': ['view', 'add', 'change', 'delete'],
+            'CalibrationStandard': ['view', 'add', 'change', 'delete'],
+            'Training': ['view', 'add', 'change', 'delete'],
+            'StandardOperatingProcedure': ['view', 'add', 'change', 'delete'],
+            'DailyVerification': ['view', 'add', 'change', 'delete'],
+        }
 
-    return {
-        'maintenance_permissions': permissions
-    }
+        # Mapeamento de nomes de modelos para abreviações ou formatos específicos
+        model_short_names = {
+            'StandardOperatingProcedure': 'sop',
+            'DailyVerification': 'dailyverification',  # Ajuste conforme a nomenclatura desejada
+            # Adicione outros mapeamentos conforme necessário
+        }
+
+        # Itera sobre cada modelo e suas ações para gerar permissões
+        for model, actions in models_permissions.items():
+            model_key = model_short_names.get(model, model.lower())
+            for action in actions:
+                perm_code = f'maintenance.{action}_{model_key}'
+                permissions[f'can_{action}_{model_key}'] = request.user.has_perm(perm_code)
+
+    return {'maintenance_permissions': permissions}

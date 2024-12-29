@@ -1,7 +1,9 @@
-# locations/urls.py
-
 from django.urls import path
 from . import views
+from .views import *
+
+# Adicione o namespace do app
+app_name = 'locations'
 
 urlpatterns = [
     # ====== Building URLs ======
@@ -21,4 +23,7 @@ urlpatterns = [
     path('measurements/room/<int:pk>/', views.measurement_room_detail, name='measurement_room_detail'),
     path('measurements/create/', views.measurement_create, name='measurement_create'),
 
+    # ====== API URLs ======
+    path('api/create-room-measurement/', create_room_and_measurement, name='create_room_measurement'),
+    path('api/measurements/<int:room_id>/', views.get_measurements_data, name='get_measurements_data'),
 ]

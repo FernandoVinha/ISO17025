@@ -10,7 +10,7 @@
         </div>
         <div class="col text-end">
             <!-- Button to Add New Methodology -->
-            <a href="{% url 'methodology_create' %}" class="btn btn-primary">
+            <a href="{% url 'methodologies:methodology_create' %}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Add Methodology
             </a>
         </div>
@@ -48,10 +48,10 @@
                 </td>
                 <td>
                     <!-- Actions: View/Edit, Delete -->
-                    <a href="{% url 'methodology_edit' methodology.pk %}" class="btn btn-sm btn-warning">
+                    <a href="{% url 'methodologies:methodology_edit' methodology.pk %}" class="btn btn-sm btn-warning">
                         <i class="bi bi-pencil"></i> View/Edit
                     </a>
-                    <a href="{% url 'methodology_delete' methodology.pk %}" class="btn btn-sm btn-danger">
+                    <a href="{% url 'methodologies:methodology_delete' methodology.pk %}" class="btn btn-sm btn-danger">
                         <i class="bi bi-trash"></i> Delete
                     </a>
                 </td>

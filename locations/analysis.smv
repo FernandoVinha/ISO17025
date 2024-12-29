@@ -1,0 +1,109 @@
+MODULE main
+VAR
+    -- Estados do edifício
+    building_name : {none, Building1, Building2};  -- Exemplos de edifícios
+    building_responsible : {none, User1, User2};   -- Responsável pelo edifício
+
+    -- Estados da sala
+    room_name : {none, RoomA, RoomB};             -- Exemplos de salas
+    room_floor : {none, Floor1, Floor2};          -- Andares
+    room_building : {none, Building1, Building2}; -- Associação da sala ao edifício
+    room_capacity : 0..50;                        -- Capacidade máxima da sala
+    room_responsible : {none, User1, User2};      -- Responsável pela sala
+
+    -- Estados da medição
+    measurement_temperature : -50..50;           -- Temperatura (em Celsius)
+    measurement_humidity : 0..100;               -- Umidade (em %)
+    measurement_room : {none, RoomA, RoomB};     -- Associação da medição à sala
+
+ASSIGN
+    -- Estados iniciais
+    init(building_name) := none;
+    init(building_responsible) := none;
+
+    init(room_name) := none;
+    init(room_building) := none;
+    init(room_capacity) := 0;
+    init(room_responsible) := none;
+
+    init(measurement_temperature) := 0;
+    init(measurement_humidity) := 0;
+    init(measurement_room) := none;
+
+    -- Transições para edifícios
+    next(building_name) :=
+        case
+            building_name = none : Building1;
+            building_name = Building1 : Building2;
+            TRUE : building_name;
+        esac;
+
+    next(building_responsible) :=
+        case
+            building_responsible = none : User1;
+            building_responsible = User1 : User2;
+            TRUE : building_responsible;
+        esac;
+
+    -- Transições para salas
+    next(room_name) :=
+        case
+            room_name = none & building_name = Building1 : RoomA;
+            room_name = RoomA & building_name = Building2 : RoomB;
+            TRUE : room_name;
+        esac;
+
+    next(room_building) :=
+        case
+            room_name = RoomA : Building1;
+            room_name = RoomB : Building2;
+            TRUE : room_building;
+        esac;
+
+    next(room_capacity) :=
+        case
+            room_name = RoomA : 20;
+            room_name = RoomB : 50;
+            TRUE : room_capacity;
+        esac;
+
+    next(room_responsible) :=
+        case
+            room_name != none : User1;
+            TRUE : room_responsible;
+        esac;
+
+    -- Transições para medições
+    next(measurement_temperature) :=
+        case
+            room_name = RoomA : 25; -- Exemplo de temperatura na sala A
+            room_name = RoomB : 22; -- Exemplo de temperatura na sala B
+            TRUE : measurement_temperature;
+        esac;
+
+    next(measurement_humidity) :=
+        case
+            room_name = RoomA : 60; -- Exemplo de umidade na sala A
+            room_name = RoomB : 55; -- Exemplo de umidade na sala B
+            TRUE : measurement_humidity;
+        esac;
+
+    next(measurement_room) :=
+        case
+            measurement_temperature != 0 : room_name;
+            TRUE : none;
+        esac;
+
+-- Propriedades LTL para verificação
+LTLSPEC
+    -- Propriedade 1: Toda sala deve estar associada a um edifício existente
+    G (room_name != none -> room_building != none)
+
+    -- Propriedade 2: Todas as medições devem estar associadas a uma sala válida
+    G (measurement_temperature != 0 -> measurement_room != none)
+
+    -- Propriedade 3: Capacidade das salas deve ser consistente
+    G (room_name != none -> room_capacity > 0)
+
+    -- Propriedade 4: Um edifício deve ter um responsável
+    G (building_name != none -> building_responsible != none)

@@ -1,0 +1,15 @@
+<!-- items_dropdown.html -->
+{% if inventory_permissions.can_view_inventoryitem or user.is_superuser %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="itemsDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+           Inventory
+        </a>
+        
+        <ul class="dropdown-menu" aria-labelledby="itemsDropdown">
+            {% if inventory_permissions.can_view_inventoryitem %}
+                <li><a class="dropdown-item" href="{% url 'inventory:inventoryitem_list' %}">View Inventory Items</a></li>
+            {% endif %}
+        </ul>
+    </li>
+{% endif %}

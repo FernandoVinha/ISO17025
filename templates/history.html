@@ -1,0 +1,32 @@
+<!-- templates/history.html-->
+{% load static %}
+<div class="history-sidebar bg-light p-3 border-start" style="width: 250px; overflow-y: auto; position: fixed; right: 0; top: 4.5rem; height: calc(100% - 4.5rem);">
+    <h5 class="text-center">History</h5>
+    {% if simple_history and simple_history|length > 0 %}
+        <ul class="list-group">
+            {% for record in simple_history|slice:":30" %}
+                <li class="list-group-item d-flex align-items-center">
+                    <!-- User Image -->
+                    <div class="user-image me-3">
+                        {% if record.history_user.profile_image %}
+                            <img src="{{ record.history_user.profile_image.url }}" alt="{{ record.history_user.get_full_name }}" class="rounded-circle">
+                        {% else %}
+                            <img src="{% static 'images/default_profile.png' %}" alt="Default Profile" class="rounded-circle">
+                        {% endif %}
+                    </div>
+                    
+                    <!-- User Name and Details -->
+                    <div>
+                        <strong>{{ record.history_user.get_full_name|default:"System" }}</strong>
+                        <br>
+                        <span class="text-muted">{{ record.history_date|date:"Y-m-d H:i" }}</span>
+                        <br>
+                        <span class="badge bg-primary">{{ record.get_history_type_display }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted text-center mt-3">No recent history available.</p>
+    {% endif %}
+</div>

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Account{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2>Edit Account</h2>
+    </div>
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+
+        <!-- First Name -->
+        <div class="mb-3">
+            <label for="id_first_name" class="form-label">First Name</label>
+            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ form.first_name.value|default_if_none:'' }}" {% if not can_edit %}disabled{% endif %} required>
+            {% if form.first_name.errors %}
+                <div class="text-danger">
+                    {{ form.first_name.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Last Name -->
+        <div class="mb-3">
+            <label for="id_last_name" class="form-label">Last Name</label>
+            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ form.last_name.value|default_if_none:'' }}" {% if not can_edit %}disabled{% endif %} required>
+            {% if form.last_name.errors %}
+                <div class="text-danger">
+                    {{ form.last_name.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value|default_if_none:'' }}" {% if not can_edit %}disabled{% endif %} required>
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Role -->
+        <div class="mb-3">
+            <label for="id_role" class="form-label">Role</label>
+            <select name="role" id="id_role" class="form-select" {% if not can_edit %}disabled{% endif %} required>
+                {% for value, display in form.role.field.choices %}
+                    <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+            {% if form.role.errors %}
+                <div class="text-danger">
+                    {{ form.role.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Profile Image -->
+        <div class="mb-3 text-center">
+            <label for="id_profile_image" class="form-label">Profile Image</label>
+            <input type="file" name="profile_image" id="id_profile_image" class="form-control" {% if not can_edit %}disabled{% endif %}>
+            {% if form.profile_image.errors %}
+                <div class="text-danger">
+                    {{ form.profile_image.errors }}
+                </div>
+            {% endif %}
+            {% if account.profile_image %}
+                <img src="{{ account.profile_image.url }}" alt="{{ account.get_full_name }}" class="img-fluid mt-3 rounded" style="max-width: 150px;">
+            {% endif %}
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+            <label for="id_is_active" class="form-label">Active</label>
+            <input type="checkbox" name="is_active" id="id_is_active" class="form-check-input" {% if form.is_active.value %}checked{% endif %} {% if not can_edit %}disabled{% endif %}>
+        </div>
+
+        <!-- Admin Status -->
+        <div class="mb-3">
+            <label for="id_is_staff" class="form-label">Admin</label>
+            <input type="checkbox" name="is_staff" id="id_is_staff" class="form-check-input" {% if form.is_staff.value %}checked{% endif %} {% if not can_edit %}disabled{% endif %}>
+        </div>
+
+        <!-- Action Buttons -->
+        {% if can_edit %}
+            <div class="d-flex justify-content-center mt-4 gap-3">
+                <!-- Save Button with Clipboard Icon -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-clipboard-check"></i> 
+                </button>
+
+                <!-- Delete Button with Trash Icon (only if account exists) -->
+                <a href="{% url 'accounts:account_delete' account.id %}" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> 
+                </a>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

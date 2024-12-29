@@ -1,5 +1,3 @@
-<!-- locations/templates/locations/room_form.html -->
-
 {% extends "base.html" %}
 {% load static %}
 
@@ -8,13 +6,13 @@
 {% block content %}
 <div class="container mt-5">
     <h2>{{ title }}</h2>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
         {% csrf_token %}
         
-        <!-- Nome da Sala -->
+        <!-- Room Name -->
         <div class="mb-3">
-            <label for="id_name" class="form-label">Nome da Sala</label>
-            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            <label for="id_name" class="form-label">Room Name</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" {% if not perms.locations.can_change_room %}disabled{% endif %} required>
             {% if form.name.errors %}
                 <div class="text-danger">
                     {{ form.name.errors }}
@@ -22,10 +20,10 @@
             {% endif %}
         </div>
         
-        <!-- Andar -->
+        <!-- Floor -->
         <div class="mb-3">
-            <label for="id_floor" class="form-label">Andar</label>
-            <input type="text" name="floor" id="id_floor" class="form-control" value="{{ form.floor.value|default:'' }}" required>
+            <label for="id_floor" class="form-label">Floor</label>
+            <input type="text" name="floor" id="id_floor" class="form-control" value="{{ form.floor.value|default:'' }}" {% if not perms.locations.can_change_room %}disabled{% endif %} required>
             {% if form.floor.errors %}
                 <div class="text-danger">
                     {{ form.floor.errors }}
@@ -33,10 +31,10 @@
             {% endif %}
         </div>
         
-        <!-- Edifício -->
+        <!-- Building -->
         <div class="mb-3">
-            <label for="id_building" class="form-label">Edifício</label>
-            <select name="building" id="id_building" class="form-select" required>
+            <label for="id_building" class="form-label">Building</label>
+            <select name="building" id="id_building" class="form-select" {% if not perms.locations.can_change_room %}disabled{% endif %} required>
                 <option value="">---------</option>
                 {% for building in form.building.field.queryset %}
                     <option value="{{ building.id }}" {% if form.building.value == building.id %}selected{% endif %}>
@@ -51,10 +49,10 @@
             {% endif %}
         </div>
         
-        <!-- Capacidade Máxima -->
+        <!-- Maximum Capacity -->
         <div class="mb-3">
-            <label for="id_capacity" class="form-label">Capacidade Máxima</label>
-            <input type="number" name="capacity" id="id_capacity" class="form-control" min="1" value="{{ form.capacity.value|default:'' }}" required>
+            <label for="id_capacity" class="form-label">Maximum Capacity</label>
+            <input type="number" name="capacity" id="id_capacity" class="form-control" min="1" value="{{ form.capacity.value|default:'' }}" {% if not perms.locations.can_change_room %}disabled{% endif %} required>
             {% if form.capacity.errors %}
                 <div class="text-danger">
                     {{ form.capacity.errors }}
@@ -62,10 +60,10 @@
             {% endif %}
         </div>
         
-        <!-- Usuário Responsável -->
+        <!-- Responsible User -->
         <div class="mb-3">
-            <label for="id_responsible_user" class="form-label">Usuário Responsável</label>
-            <select name="responsible_user" id="id_responsible_user" class="form-select">
+            <label for="id_responsible_user" class="form-label">Responsible User</label>
+            <select name="responsible_user" id="id_responsible_user" class="form-select" {% if not perms.locations.can_change_room %}disabled{% endif %}>
                 <option value="">---------</option>
                 {% for user in form.responsible_user.field.queryset %}
                     <option value="{{ user.id }}" {% if form.responsible_user.value == user.id %}selected{% endif %}>
@@ -80,10 +78,10 @@
             {% endif %}
         </div>
         
-        <!-- Imagem da Sala -->
+        <!-- Room Image -->
         <div class="mb-3">
-            <label for="id_image" class="form-label">Imagem da Sala</label>
-            <input type="file" name="image" id="id_image" class="form-control">
+            <label for="id_image" class="form-label">Room Image</label>
+            <input type="file" name="image" id="id_image" class="form-control" {% if not perms.locations.can_change_room %}disabled{% endif %}>
             {% if form.image.errors %}
                 <div class="text-danger">
                     {{ form.image.errors }}
@@ -91,12 +89,22 @@
             {% endif %}
         </div>
 
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-        
-        <!-- Botão de Deletar (apenas para edição) -->
-        {% if room %}
-            <a href="{% url 'room_delete' room.id %}" class="btn btn-danger">Deletar Sala</a>
-        {% endif %}
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center mt-4 gap-3">
+            {% if perms.locations.can_change_room %}
+                <!-- Save Button with Clipboard Icon -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-clipboard-check"></i>
+                </button>
+            {% endif %}
+
+            {% if perms.locations.can_delete_room and room and room.id %}
+                <!-- Delete Button with Trash Icon (only in edit) -->
+                <a href="{% url 'locations:room_delete' room.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this room? This action cannot be undone.');">
+                    <i class="bi bi-trash"></i>
+                </a>
+            {% endif %}
+        </div>
     </form>
 </div>
 {% endblock %}

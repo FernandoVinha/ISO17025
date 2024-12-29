@@ -1,0 +1,20 @@
+{% if locations_permissions.can_view_building or locations_permissions.can_view_measurement or locations_permissions.can_view_room %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="locationsDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            Locations
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="locationsDropdown">
+            {% if locations_permissions.can_view_building %}
+                <li><a class="dropdown-item" href="{% url 'locations:building_list' %}">Buildings</a></li>
+            {% endif %}
+            {% if locations_permissions.can_view_room %}
+                <li><a class="dropdown-item" href="{% url 'locations:room_list' %}">Rooms</a></li>
+            {% endif %}
+            {% if locations_permissions.can_view_measurement %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'locations:measurement_room_list' %}">Measurements</a></li>
+            {% endif %}
+        </ul>
+    </li>
+{% endif %}

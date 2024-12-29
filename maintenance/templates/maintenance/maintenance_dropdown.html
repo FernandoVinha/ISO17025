@@ -1,0 +1,33 @@
+{% if maintenance_permissions.can_view_maintenance or maintenance_permissions.can_view_calibration or maintenance_permissions.can_view_training or maintenance_permissions.can_view_sop or maintenance_permissions.can_view_calibrationstandard or maintenance_permissions.can_view_dailyverification %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="maintenanceDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            Maintenance
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="maintenanceDropdown">
+            {% if maintenance_permissions.can_view_maintenance %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:maintenance_list' %}">Manutenções</a></li>
+            {% endif %}
+            
+            {% if maintenance_permissions.can_view_calibration %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:calibration_list' %}">Calibrações</a></li>
+            {% endif %}
+            
+            {% if maintenance_permissions.can_view_training %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:training_list' %}">Treinamentos</a></li>
+            {% endif %}
+            
+            {% if maintenance_permissions.can_view_sop %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:sop_list' %}">SOPs</a></li>
+            {% endif %}
+            
+            {% if maintenance_permissions.can_view_calibrationstandard %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:calibration_standard_list' %}">Padrões de Calibração</a></li>
+            {% endif %}
+            
+            {% if maintenance_permissions.can_view_dailyverification %}
+                <li><a class="dropdown-item" href="{% url 'maintenance:daily_verification_list' %}">Verificações Diárias</a></li>
+            {% endif %}
+        </ul>
+    </li>
+{% endif %}

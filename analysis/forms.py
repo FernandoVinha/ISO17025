@@ -1,13 +1,13 @@
 from django import forms
 from .models import AnalysisRequest, ReceptionItem, Analysis, AnalysisApproval, Disposal
 
+# ====== Formulário para AnalysisRequest ======
 class AnalysisRequestForm(forms.ModelForm):
     class Meta:
         model = AnalysisRequest
         fields = [
             'title',
-            'company',
-            'requested_by',
+            'requested_by', 
             'methodologies',
             'comments',
             'sample_image',
@@ -17,6 +17,7 @@ class AnalysisRequestForm(forms.ModelForm):
             'methodologies': forms.CheckboxSelectMultiple(),
         }
 
+# ====== Formulário para ReceptionItem ======
 class ReceptionItemForm(forms.ModelForm):
     class Meta:
         model = ReceptionItem
@@ -25,8 +26,7 @@ class ReceptionItemForm(forms.ModelForm):
             'serial_number',
             'weight',
             'analysis_request',
-            'company',
-            'condition',
+            'condition',  
             'sample_image',
             'shipment_date',
             'shipment_location',
@@ -37,6 +37,7 @@ class ReceptionItemForm(forms.ModelForm):
             'shipment_location': forms.TextInput(attrs={'placeholder': 'Location details'}),
         }
 
+# ====== Formulário para Analysis ======
 class AnalysisForm(forms.ModelForm):
     class Meta:
         model = Analysis
@@ -55,9 +56,10 @@ class AnalysisForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Add custom validation logic if needed
+        # Adicione lógica de validação personalizada, se necessário
         return cleaned_data
 
+# ====== Formulário para AnalysisApproval ======
 class AnalysisApprovalForm(forms.ModelForm):
     class Meta:
         model = AnalysisApproval
@@ -72,6 +74,7 @@ class AnalysisApprovalForm(forms.ModelForm):
             'comments': forms.Textarea(attrs={'rows': 3}),
         }
 
+# ====== Formulário para Disposal ======
 class DisposalForm(forms.ModelForm):
     class Meta:
         model = Disposal

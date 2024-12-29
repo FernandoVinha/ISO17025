@@ -1,14 +1,12 @@
+# inventory/urls.py
 from django.urls import path
-from .views import (
-    inventoryitem_list,
-    inventoryitem_create,
-    inventoryitem_edit,
-    inventoryitem_delete,
-)
+from . import views
+
+app_name = 'inventory'  # Ensure this namespace is defined
 
 urlpatterns = [
-    path('', inventoryitem_list, name='inventoryitem_list'),  # Lista de itens de inventário
-    path('add/', inventoryitem_create, name='inventoryitem_create'),  # Adicionar novo item
-    path('edit/<int:pk>/', inventoryitem_edit, name='inventoryitem_edit'),  # Editar item existente
-    path('delete/<int:pk>/', inventoryitem_delete, name='inventoryitem_delete'),  # Deletar item
+    path('', views.inventoryitem_list, name='inventoryitem_list'),
+    path('add/', views.inventoryitem_create, name='inventoryitem_create'),
+    path('edit/<int:pk>/', views.inventoryitem_edit, name='inventoryitem_edit'),
+    path('delete/<int:pk>/', views.inventoryitem_delete, name='inventoryitem_delete'),  # Correct URL for deletion
 ]

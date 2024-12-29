@@ -1,54 +1,87 @@
-<!-- locations/templates/locations/room_list.html -->
-
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Lista de Salas{% endblock %}
+{% block title %}Room List{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <div class="d-flex justify-content-between mb-3">
-        <h2>Salas</h2>
-        <a href="{% url 'room_create' %}" class="btn btn-primary">Adicionar Sala</a>
+    <div class="d-flex justify-content-center mb-3">
+        <h2>Rooms</h2>
     </div>
 
-    <!-- Barra de busca -->
-    <form method="get" action="{% url 'room_list' %}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Buscar sala..." value="{{ request.GET.search }}">
-            <button type="submit" class="btn btn-secondary">Filtrar</button>
-        </div>
-    </form>
+    <!-- Search bar and add room button centered -->
+    <div class="d-flex justify-content-center mb-4">
+        <form method="get" action="{% url 'locations:room_list' %}" class="d-flex me-2">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search room..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-search"></i> <!-- Search icon -->
+                </button>
+            </div>
+        </form>
+        {% if locations_permissions.can_add_room %}
+            <!-- Add room button as a "+" icon -->
+            <a href="{% url 'locations:room_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus"></i> <!-- Plus icon for adding -->
+            </a>
+        {% endif %}
+    </div>
 
-    <!-- Cards de salas -->
+    <!-- Room cards -->
     <div class="row">
         {% for room in rooms %}
             <div class="col-md-4 mb-4">
-                <div class="card h-100" style="cursor: pointer;" onclick="window.location.href='{% url 'room_edit' room.id %}'">
-                    <div class="d-flex align-items-center p-3">
-                        {% if room.image %}
-                            <img src="{{ room.image.url }}" alt="{{ room.name }}" 
-                                 class="rounded-circle me-3" 
-                                 style="width: 80px; height: 80px; object-fit: cover;">
-                        {% else %}
-                            <!-- Imagem padrão caso não tenha image -->
-                            <img src="{% static 'images/default_room.png' %}" alt="Sem Imagem" 
-                                 class="rounded-circle me-3" 
-                                 style="width: 80px; height: 80px; object-fit: cover;">
-                        {% endif %}
-                        <div>
-                            <h5 class="card-title mb-1">{{ room.name }}</h5>
-                            <p class="card-text mb-0">Andar: {{ room.floor }}</p>
-                            <p class="card-text">Edifício: {{ room.building.name }}</p>
-                            <p class="card-text">Capacidade: {{ room.capacity }}</p>
-                            <p class="card-text">Responsável: {{ room.responsible_user }}</p>
-                        </div>
+                <div class="card h-100" style="cursor: pointer;"
+                     {% if locations_permissions.can_change_room %}
+                         onclick="window.location.href='{% url 'locations:room_edit' room.id %}'"
+                     {% endif %}>
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">{{ room.name }}</h5>
+                        <p class="card-text mb-0">Floor: {{ room.floor }}</p>
+                        <p class="card-text">Capacity: {{ room.capacity }}</p>
                     </div>
                 </div>
             </div>
         {% empty %}
-            <p class="text-muted">Nenhuma sala encontrada.</p>
+            <p class="text-muted text-center">No rooms found.</p>
         {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if rooms.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span> <!-- First page icon -->
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ rooms.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span> <!-- Previous page icon -->
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ rooms.number }} of {{ rooms.paginator.num_pages }}</span>
+                </li>
+
+                {% if rooms.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ rooms.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span> <!-- Next page icon -->
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ rooms.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span> <!-- Last page icon -->
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 </div>
 {% endblock %}

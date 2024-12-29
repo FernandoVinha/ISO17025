@@ -1,0 +1,52 @@
+<!-- accounts/templates/accounts/relationshiptype_form.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Nome do Tipo de Relacionamento -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Nome</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default_if_none:'' }}" required>
+            {% if form.name.errors %}
+                <div class="text-danger">
+                    {{ form.name.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{% url 'accounts:relationshiptype_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+
+    <!-- Histórico de Alterações -->
+    <div class="mt-5">
+        <h4>Histórico de Alterações</h4>
+        <ul class="list-group">
+            {% for entry in simple_history %}
+                <li class="list-group-item">
+                    <strong>{{ entry.history_date|date:"d/m/Y H:i" }}</strong> - {{ entry.history_user }} 
+                    {% if entry.history_type == '+' %}
+                        Adicionado
+                    {% elif entry.history_type == '~' %}
+                        Atualizado
+                    {% elif entry.history_type == '-' %}
+                        Deletado
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item">Nenhuma alteração registrada.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

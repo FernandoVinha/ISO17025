@@ -1,0 +1,12 @@
+{% if permissions.can_view_methodology or permissions.can_add_methodology or user.is_superuser %}
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="methodologyDropdown" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false">
+            Methodology
+        </a>
+        
+        <ul class="dropdown-menu" aria-labelledby="methodologyDropdown">
+            <li><a class="dropdown-item" href="{% url 'methodologies:methodology_list' %}">View Methodologies</a></li>
+        </ul>
+    </li>
+{% endif %}

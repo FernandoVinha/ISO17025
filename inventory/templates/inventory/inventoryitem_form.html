@@ -6,13 +6,13 @@
 {% block content %}
 <div class="container mt-5">
     <h2>{{ title }}</h2>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
         {% csrf_token %}
         
-        <!-- Nome do Item -->
+        <!-- Item Name -->
         <div class="mb-3">
-            <label for="id_name" class="form-label">Nome do Item</label>
-            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" required>
+            <label for="id_name" class="form-label">Item Name</label>
+            <input type="text" name="name" id="id_name" class="form-control" value="{{ form.name.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
             {% if form.name.errors %}
                 <div class="text-danger">
                     {{ form.name.errors }}
@@ -20,10 +20,10 @@
             {% endif %}
         </div>
         
-        <!-- Número de Série -->
+        <!-- Serial Number -->
         <div class="mb-3">
-            <label for="id_serial_number" class="form-label">Número de Série</label>
-            <input type="text" name="serial_number" id="id_serial_number" class="form-control" value="{{ form.serial_number.value|default:'' }}" required>
+            <label for="id_serial_number" class="form-label">Serial Number</label>
+            <input type="text" name="serial_number" id="id_serial_number" class="form-control" value="{{ form.serial_number.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
             {% if form.serial_number.errors %}
                 <div class="text-danger">
                     {{ form.serial_number.errors }}
@@ -31,14 +31,14 @@
             {% endif %}
         </div>
         
-        <!-- Tipo de Item -->
+        <!-- Item Type -->
         <div class="mb-3">
-            <label for="id_item_type" class="form-label">Tipo de Item</label>
-            <select name="item_type" id="id_item_type" class="form-select" required>
+            <label for="id_item_type" class="form-label">Item Type</label>
+            <select name="item_type" id="id_item_type" class="form-select" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
                 <option value="">---------</option>
-                {% for value, label in form.item_type.field.choices %}
-                    <option value="{{ value }}" {% if form.item_type.value == value %}selected{% endif %}>
-                        {{ label }}
+                {% for key, value in form.item_type.field.choices %}
+                    <option value="{{ key }}" {% if form.item_type.value == key %}selected{% endif %}>
+                        {{ value }}
                     </option>
                 {% endfor %}
             </select>
@@ -48,11 +48,11 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Fornecedor -->
+        
+        <!-- Supplier -->
         <div class="mb-3">
-            <label for="id_supplier" class="form-label">Fornecedor</label>
-            <input type="text" name="supplier" id="id_supplier" class="form-control" value="{{ form.supplier.value|default:'' }}" required>
+            <label for="id_supplier" class="form-label">Supplier</label>
+            <input type="text" name="supplier" id="id_supplier" class="form-control" value="{{ form.supplier.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
             {% if form.supplier.errors %}
                 <div class="text-danger">
                     {{ form.supplier.errors }}
@@ -60,57 +60,89 @@
             {% endif %}
         </div>
         
-        <!-- Custo -->
+        <!-- Cost -->
         <div class="mb-3">
-            <label for="id_cost" class="form-label">Custo</label>
-            <input type="number" name="cost" id="id_cost" class="form-control" value="{{ form.cost.value|default:'' }}" step="0.01" required>
+            <label for="id_cost" class="form-label">Cost</label>
+            <input type="number" step="0.01" name="cost" id="id_cost" class="form-control" value="{{ form.cost.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
             {% if form.cost.errors %}
                 <div class="text-danger">
                     {{ form.cost.errors }}
                 </div>
             {% endif %}
         </div>
-
-        <!-- Data de Fabricação -->
+        
+        <!-- Manufacturing Date -->
         <div class="mb-3">
-            <label for="id_manufacturing_date" class="form-label">Data de Fabricação</label>
-            <input type="date" name="manufacturing_date" id="id_manufacturing_date" class="form-control" value="{{ form.manufacturing_date.value|default:'' }}" required>
+            <label for="id_manufacturing_date" class="form-label">Manufacturing Date</label>
+            <input type="date" name="manufacturing_date" id="id_manufacturing_date" class="form-control" value="{{ form.manufacturing_date.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %} required>
             {% if form.manufacturing_date.errors %}
                 <div class="text-danger">
                     {{ form.manufacturing_date.errors }}
                 </div>
             {% endif %}
         </div>
-
-        <!-- Data de Validade -->
+        
+        <!-- Expiration Date -->
         <div class="mb-3">
-            <label for="id_expiration_date" class="form-label">Data de Validade</label>
-            <input type="date" name="expiration_date" id="id_expiration_date" class="form-control" value="{{ form.expiration_date.value|default:'' }}">
+            <label for="id_expiration_date" class="form-label">Expiration Date</label>
+            <input type="date" name="expiration_date" id="id_expiration_date" class="form-control" value="{{ form.expiration_date.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
             {% if form.expiration_date.errors %}
                 <div class="text-danger">
                     {{ form.expiration_date.errors }}
                 </div>
             {% endif %}
         </div>
-
-        <!-- Quantidade -->
+        
+        <!-- Reception Date -->
         <div class="mb-3">
-            <label for="id_quantity" class="form-label">Quantidade</label>
-            <input type="number" name="quantity" id="id_quantity" class="form-control" value="{{ form.quantity.value|default:'' }}" step="0.01">
+            <label for="id_reception_date" class="form-label">Reception Date</label>
+            <input type="date" name="reception_date" id="id_reception_date" class="form-control" value="{{ form.reception_date.value|default:'' }}" disabled>
+            {% if form.reception_date.errors %}
+                <div class="text-danger">
+                    {{ form.reception_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Received By -->
+        <div class="mb-3">
+            <label for="id_received_by" class="form-label">Received By</label>
+            <select name="received_by" id="id_received_by" class="form-select" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
+                <option value="">---------</option>
+                {% for user in form.received_by.field.queryset %}
+                    <option value="{{ user.id }}" {% if form.received_by.value == user.id %}selected{% endif %}>
+                        {{ user.get_full_name }} ({{ user.username }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.received_by.errors %}
+                <div class="text-danger">
+                    {{ form.received_by.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quantity (Only for Supplies) -->
+        <div class="mb-3">
+            <label for="id_quantity" class="form-label">Quantity</label>
+            <input type="number" step="0.01" name="quantity" id="id_quantity" class="form-control" value="{{ form.quantity.value|default:'' }}" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
             {% if form.quantity.errors %}
                 <div class="text-danger">
                     {{ form.quantity.errors }}
                 </div>
             {% endif %}
         </div>
-
-        <!-- Unidade -->
+        
+        <!-- Unit (Only for Supplies) -->
         <div class="mb-3">
-            <label for="id_unit" class="form-label">Unidade</label>
-            <select name="unit" id="id_unit" class="form-select">
+            <label for="id_unit" class="form-label">Unit</label>
+            <select name="unit" id="id_unit" class="form-select" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
                 <option value="">---------</option>
-                <option value="L" {% if form.unit.value == 'L' %}selected{% endif %}>Litros</option>
-                <option value="G" {% if form.unit.value == 'G' %}selected{% endif %}>Gramas</option>
+                {% for key, value in form.unit.field.choices %}
+                    <option value="{{ key }}" {% if form.unit.value == key %}selected{% endif %}>
+                        {{ value }}
+                    </option>
+                {% endfor %}
             </select>
             {% if form.unit.errors %}
                 <div class="text-danger">
@@ -118,22 +150,33 @@
                 </div>
             {% endif %}
         </div>
-
-        <!-- Imagem do Item -->
+        
+        <!-- Item Image -->
         <div class="mb-3">
-            <label for="id_image" class="form-label">Imagem do Item</label>
-            <input type="file" name="image" id="id_image" class="form-control">
+            <label for="id_image" class="form-label">Item Image</label>
+            <input type="file" name="image" id="id_image" class="form-control" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
             {% if form.image.errors %}
                 <div class="text-danger">
                     {{ form.image.errors }}
                 </div>
             {% endif %}
         </div>
-
-        <!-- Usuário Responsável -->
+        
+        <!-- Description -->
         <div class="mb-3">
-            <label for="id_responsible_user" class="form-label">Usuário Responsável</label>
-            <select name="responsible_user" id="id_responsible_user" class="form-select">
+            <label for="id_description" class="form-label">Description</label>
+            <textarea name="description" id="id_description" class="form-control" rows="3" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+                <div class="text-danger">
+                    {{ form.description.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Responsible User -->
+        <div class="mb-3">
+            <label for="id_responsible_user" class="form-label">Responsible User</label>
+            <select name="responsible_user" id="id_responsible_user" class="form-select" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
                 <option value="">---------</option>
                 {% for user in form.responsible_user.field.queryset %}
                     <option value="{{ user.id }}" {% if form.responsible_user.value == user.id %}selected{% endif %}>
@@ -147,13 +190,41 @@
                 </div>
             {% endif %}
         </div>
-
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
         
-        <!-- Botão de Deletar (apenas para edição) -->
-        {% if inventory_item %}
-            <a href="{% url 'inventoryitem_delete' inventory_item.id %}" class="btn btn-danger">Deletar Item</a>
-        {% endif %}
+        <!-- Room -->
+        <div class="mb-3">
+            <label for="id_room" class="form-label">Room</label>
+            <select name="room" id="id_room" class="form-select" {% if not perms.inventory.can_change_inventoryitem %}disabled{% endif %}>
+                <option value="">---------</option>
+                {% for room in form.room.field.queryset %}
+                    <option value="{{ room.id }}" {% if form.room.value == room.id %}selected{% endif %}>
+                        {{ room.name }} - {{ room.building.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.room.errors %}
+                <div class="text-danger">
+                    {{ form.room.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-center mt-4 gap-3">
+            {% if perms.inventory.can_change_inventoryitem %}
+                <!-- Save Button with Clipboard Icon -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-clipboard-check"></i>
+                </button>
+            {% endif %}
+            
+            {% if perms.inventory.can_delete_inventoryitem and inventory_item and inventory_item.id %}
+                <!-- Delete Button with Trash Icon (only in edit) -->
+                <a href="{% url 'inventory:inventoryitem_delete' inventory_item.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this inventory item? This action cannot be undone.');">
+                    <i class="bi bi-trash"></i>
+                </a>
+            {% endif %}
+        </div>
     </form>
 </div>
 {% endblock %}

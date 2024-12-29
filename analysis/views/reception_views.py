@@ -36,8 +36,7 @@ def create_or_edit_reception_item(request, pk):
 
     # Tenta encontrar um ReceptionItem associado ou cria um novo
     reception_item, created = ReceptionItem.objects.get_or_create(
-        analysis_request=analysis_request,
-        defaults={'company': analysis_request.company}
+        analysis_request=analysis_request
     )
 
     if request.method == 'POST':
@@ -67,7 +66,7 @@ def delete_reception_item(request, pk):
     reception_item = get_object_or_404(ReceptionItem, pk=pk)
 
     # Verifica se o usuário tem permissão para deletar
-    if not request.user.has_perm('analysis.can_delete_receptionitem'):
+    if reception_item.received_by != request.user and not request.user.is_superuser:
         raise PermissionDenied("Você não tem permissão para deletar esta recepção.")
 
     if request.method == 'POST':

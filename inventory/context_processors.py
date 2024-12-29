@@ -1,13 +1,18 @@
+# inventory/context_processors.py
+
 def inventory_permissions(request):
     permissions = {}
 
     if request.user.is_authenticated:
-        # Verificar permissões de itens de inventário
-        permissions['can_view_inventoryitem'] = request.user.has_perm('inventory.can_view_inventoryitem')
-        permissions['can_add_inventoryitem'] = request.user.has_perm('inventory.can_add_inventoryitem')
-        permissions['can_change_inventoryitem'] = request.user.has_perm('inventory.can_change_inventoryitem')
-        permissions['can_delete_inventoryitem'] = request.user.has_perm('inventory.can_delete_inventoryitem')
+        # Defina as permissões de forma dinâmica
+        models_permissions = {
+            'InventoryItem': ['view', 'add', 'change', 'delete'],
+        }
 
-    return {
-        'inventory_permissions': permissions
-    }
+        # Itera sobre cada modelo e suas ações para gerar permissões
+        for model, actions in models_permissions.items():
+            for action in actions:
+                perm_code = f'inventory.{action}_{model.lower()}'
+                permissions[f'can_{action}_{model.lower()}'] = request.user.has_perm(perm_code)
+
+    return {'inventory_permissions': permissions}

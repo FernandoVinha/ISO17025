@@ -1,20 +1,27 @@
 # accounts/context_processors.py
 
-from django.apps import apps
 from django.conf import settings
 
 def user_permissions(request):
     permissions = {}
 
     if request.user.is_authenticated:
-        # Itera sobre todos os apps instalados
-        for app_config in apps.get_app_configs():
-            app_label = app_config.label
-            # Adiciona permissões específicas para cada app no contexto
-            permissions[f'can_view_{app_label}'] = request.user.has_perm(f'{app_label}.view_{app_label}')
-            permissions[f'can_add_{app_label}'] = request.user.has_perm(f'{app_label}.add_{app_label}')
-            permissions[f'can_change_{app_label}'] = request.user.has_perm(f'{app_label}.change_{app_label}')
-            permissions[f'can_delete_{app_label}'] = request.user.has_perm(f'{app_label}.delete_{app_label}')
+        # Defina explicitamente as permissões personalizadas
+        custom_permissions = [
+            'can_view_accounts',
+            'can_add_account',
+            'can_change_account',
+            'can_delete_account',
+            'can_view_companies',
+            'can_view_contacts',
+            'can_view_relationshiptype',
+            'can_view_profile',
+            'can_generate_invite',
+            # Adicione outras permissões personalizadas conforme necessário
+        ]
+
+        for perm in custom_permissions:
+            permissions[perm] = request.user.has_perm(f'accounts.{perm}')
 
     # Informações do usuário logado
     user_info = {

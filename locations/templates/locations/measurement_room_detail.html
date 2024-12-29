@@ -21,52 +21,45 @@
     <!-- Measurement Chart -->
     <div class="mb-4">
         <canvas id="measurementChart" width="400" height="200"></canvas>
-    </div>
-
-    <!-- Add Measurement Button -->
-    <div class="mb-4">
-        <!-- The button links to the measurement_create view with the current room's ID as a GET parameter -->
-        <a href="{% url 'measurement_create' %}?room={{ room.id }}" class="btn btn-primary">Add Measurement</a>
+        <div id="loading-indicator" style="display: none; text-align: center; margin-top: 10px;">
+            <span>Loading data...</span>
+        </div>
     </div>
 </div>
 
 <!-- Include Chart.js from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Retrieve the data passed from the view
-    const timestamps = {{ timestamps|safe }};
-    const temperatures = {{ temperatures|safe }};
-    const humidities = {{ humidities|safe }};
+    const roomId = {{ room.id }};
+    const measurementApiUrl = "{% url 'locations:get_measurements_data' room.id %}";
 
-    // Prepare the data for Chart.js
-    const data = {
-        labels: timestamps,
-        datasets: [
-            {
-                label: 'Temperature (°C)',
-                data: temperatures,
-                borderColor: 'rgba(255, 99, 132, 1)', // Red
-                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light Red
-                yAxisID: 'y1',
-                tension: 0.4, // Smooth curves
-                fill: true,
-            },
-            {
-                label: 'Humidity (%)',
-                data: humidities,
-                borderColor: 'rgba(54, 162, 235, 1)', // Blue
-                backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light Blue
-                yAxisID: 'y2',
-                tension: 0.4,
-                fill: true,
-            }
-        ]
-    };
-
-    // Configure the chart options
-    const config = {
+    // Inicialize o gráfico vazio
+    const ctx = document.getElementById('measurementChart').getContext('2d');
+    const chart = new Chart(ctx, {
         type: 'line',
-        data: data,
+        data: {
+            labels: [], // Começa vazio
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: [],
+                    borderColor: 'rgba(255, 99, 132, 1)', // Vermelho
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)', // Vermelho claro
+                    yAxisID: 'y1',
+                    tension: 0.4,
+                    fill: true,
+                },
+                {
+                    label: 'Humidity (%)',
+                    data: [],
+                    borderColor: 'rgba(54, 162, 235, 1)', // Azul
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)', // Azul claro
+                    yAxisID: 'y2',
+                    tension: 0.4,
+                    fill: true,
+                }
+            ],
+        },
         options: {
             responsive: true,
             interaction: {
@@ -77,50 +70,61 @@
             plugins: {
                 title: {
                     display: true,
-                    text: 'Measurements for Room: {{ room.name }}'
+                    text: 'Últimas medições'
                 },
-                tooltip: {
-                    enabled: true,
-                    mode: 'nearest',
-                    intersect: false,
-                }
             },
             scales: {
                 y1: {
                     type: 'linear',
-                    display: true,
                     position: 'left',
                     title: {
                         display: true,
                         text: 'Temperature (°C)'
                     },
-                    ticks: {
-                        beginAtZero: true,
-                    }
                 },
                 y2: {
                     type: 'linear',
-                    display: true,
                     position: 'right',
                     grid: {
-                        drawOnChartArea: false, // Only draw grid lines for y1
+                        drawOnChartArea: false, // Apenas desenha linhas para y1
                     },
                     title: {
                         display: true,
                         text: 'Humidity (%)'
                     },
-                    ticks: {
-                        beginAtZero: true,
-                    }
                 }
             }
-        },
-    };
+        }
+    });
 
-    // Render the chart
-    const myChart = new Chart(
-        document.getElementById('measurementChart'),
-        config
-    );
+    // Função para buscar dados da API e atualizar o gráfico
+    async function fetchAndUpdateChart() {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        loadingIndicator.style.display = 'block';
+
+        try {
+            const response = await fetch(measurementApiUrl);
+            if (!response.ok) {
+                throw new Error('Erro ao buscar dados');
+            }
+            const data = await response.json();
+
+            // Atualize os dados do gráfico
+            chart.data.labels = data.timestamps;
+            chart.data.datasets[0].data = data.temperatures;
+            chart.data.datasets[1].data = data.humidities;
+            chart.update();
+        } catch (error) {
+            console.error('Erro ao atualizar o gráfico:', error);
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    // Atualize os dados periodicamente
+    setInterval(fetchAndUpdateChart, 1000); // Atualiza a cada 10 segundos
+
+    // Chamada inicial para preencher o gráfico
+    fetchAndUpdateChart();
 </script>
 {% endblock %}

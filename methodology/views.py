@@ -21,9 +21,13 @@ def methodology_list(request):
     methodology_filter = MethodologyFilter(request.GET, queryset=methodologies)
     methodologies = methodology_filter.qs
 
+    # Get the history for each methodology
+    methodology_history = {methodology.pk: methodology.history.all()[:30] for methodology in methodologies}
+
     return render(request, 'methodologies/methodology_list.html', {
         'methodologies': methodologies,
         'filter': methodology_filter,
+        'methodology_history': methodology_history  # Pass the history for each methodology
     })
 
 
@@ -59,6 +63,9 @@ def methodology_edit_or_view(request, pk):
     methodology = get_object_or_404(Methodology, pk=pk)
     can_edit = request.user.has_perm('methodologies.can_change_methodology')
 
+    # Get the history of the methodology
+    methodology_history = methodology.history.all()[:30]
+
     if request.method == 'POST' and can_edit:
         form = MethodologyForm(request.POST, instance=methodology)
         if form.is_valid():
@@ -80,6 +87,7 @@ def methodology_edit_or_view(request, pk):
         'supplies': supplies,
         'methodology': methodology,
         'can_edit': can_edit,
+        'methodology_history': methodology_history,  # Pass the methodology history
         'title': 'View/Edit Methodology',
         'button_label': 'Update' if can_edit else 'View'
     })
@@ -117,9 +125,12 @@ def methodology_supply_add(request, pk):
             supply = supply_form.save(commit=False)
             supply.methodology = methodology
             supply.save()
+            # Get updated supplies
             supplies = MethodologySupply.objects.filter(methodology=methodology)
-            # Return updated supply list as HTML
-            html = render_to_string('methodologies/partial_supply_list.html', {'supplies': supplies, 'can_edit': True})
+            # Get the updated history for the methodology
+            methodology_history = methodology.history.all()[:30]
+            # Return updated supply list and history as HTML
+            html = render_to_string('methodologies/partial_supply_list.html', {'supplies': supplies, 'can_edit': True, 'methodology_history': methodology_history})
             return JsonResponse({'success': True, 'html': html})
 
     return JsonResponse({'success': False})
@@ -135,6 +146,7 @@ def methodology_supply_delete(request, pk):
     methodology = supply.methodology
     supply.delete()
     supplies = MethodologySupply.objects.filter(methodology=methodology)
-    # Return updated supply list as HTML
-    html = render_to_string('methodologies/partial_supply_list.html', {'supplies': supplies, 'can_edit': True})
+    methodology_history = methodology.history.all()[:30]
+    # Return updated supply list and history as HTML
+    html = render_to_string('methodologies/partial_supply_list.html', {'supplies': supplies, 'can_edit': True, 'methodology_history': methodology_history})
     return JsonResponse({'success': True, 'html': html})

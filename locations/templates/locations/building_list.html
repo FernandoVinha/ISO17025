@@ -1,52 +1,99 @@
-<!-- locations/templates/locations/building_list.html -->
-
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Lista de Edifícios{% endblock %}
+{% block title %}Building List{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <div class="d-flex justify-content-between mb-3">
-        <h2>Edifícios</h2>
-        <a href="{% url 'building_create' %}" class="btn btn-primary">Adicionar Edifício</a>
+    <div class="d-flex justify-content-center mb-3">
+        <h2>Buildings</h2>
     </div>
 
-    <!-- Barra de busca -->
-    <form method="get" action="{% url 'building_list' %}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Buscar edifício..." value="{{ request.GET.search }}">
-            <button type="submit" class="btn btn-secondary">Filtrar</button>
-        </div>
-    </form>
+    <!-- Search bar and add building button centered -->
+    <div class="d-flex justify-content-center mb-4">
+        <form method="get" action="{% url 'locations:building_list' %}" class="d-flex me-2">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search building..." value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-search"></i> <!-- Search icon -->
+                </button>
+            </div>
+        </form>
+        {% if locations_permissions.can_add_building %}
+            <!-- Add building button as a "+" icon -->
+            <a href="{% url 'locations:building_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus"></i> <!-- Plus icon -->
+            </a>
+        {% endif %}
+    </div>
 
-    <!-- Cards de edifícios -->
+    <!-- Building cards -->
     <div class="row">
         {% for building in buildings %}
             <div class="col-md-4 mb-4">
-                <div class="card h-100" style="cursor: pointer;" onclick="window.location.href='{% url 'building_edit' building.id %}'">
+                <div class="card h-100" style="cursor: pointer;"
+                     {% if locations_permissions.can_change_building %}
+                         onclick="window.location.href='{% url 'locations:building_edit' building.id %}'"
+                     {% endif %}>
                     <div class="d-flex align-items-center p-3">
                         {% if building.image %}
                             <img src="{{ building.image.url }}" alt="{{ building.name }}" 
                                  class="rounded-circle me-3" 
                                  style="width: 80px; height: 80px; object-fit: cover;">
                         {% else %}
-                            <!-- Imagem padrão caso não tenha image -->
-                            <img src="{% static 'images/default_building.png' %}" alt="Sem Imagem" 
+                            <!-- Default image if no image is available -->
+                            <img src="{% static 'images/default_building.png' %}" alt="No Image" 
                                  class="rounded-circle me-3" 
                                  style="width: 80px; height: 80px; object-fit: cover;">
                         {% endif %}
                         <div>
                             <h5 class="card-title mb-1">{{ building.name }}</h5>
                             <p class="card-text mb-0">{{ building.address }}</p>
-                            <p class="card-text">{{ building.responsible_user }}</p>
+                            <p class="card-text"><i class="bi bi-person"></i> {{ building.responsible_user }}</p> <!-- Person icon -->
                         </div>
                     </div>
                 </div>
             </div>
         {% empty %}
-            <p class="text-muted">Nenhum edifício encontrado.</p>
+            <p class="text-muted text-center">No buildings found.</p>
         {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if buildings.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span> <!-- First page icon -->
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ buildings.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span> <!-- Previous page icon -->
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ buildings.number }} of {{ buildings.paginator.num_pages }}</span>
+                </li>
+
+                {% if buildings.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ buildings.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span> <!-- Next page icon -->
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ buildings.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span> <!-- Last page icon -->
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 </div>
 {% endblock %}

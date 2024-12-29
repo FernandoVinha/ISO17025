@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'simple_history', 
     'django_extensions',
     'django_filters',
+    'rest_framework',
+    
 
     'accounts',
     'locations',
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     'maintenance',
     'methodology',
     'analysis',
+    'nonconformity',
 
 ]
 
@@ -59,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -80,6 +84,7 @@ TEMPLATES = [
                 'methodology.context_processors.methodology_permissions',
                 'analysis.context_processors.analysis_permissions',
                 'inventory.context_processors.inventory_permissions',
+                'utils.context_processors.global_history',
             ],
         },
     },

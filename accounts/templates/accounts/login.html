@@ -1,50 +1,50 @@
-{% extends 'base.html' %}
+<!-- accounts/templates/accounts/login.html -->
+{% extends "base.html" %}
+{% load static %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h2>Login</h2>
-    
-    <form method="POST" action="{% url 'login' %}">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Exibir erro geral do formulário -->
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
+        <!-- Email -->
         <div class="mb-3">
             <label for="id_username" class="form-label">Email</label>
-            <input type="email" name="username" id="id_username" class="form-control" required>
+            <input type="email" name="username" id="id_username" class="form-control" value="{{ form.username.value|default:'' }}" required>
             {% if form.username.errors %}
                 <div class="text-danger">
-                    {% for error in form.username.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.username.errors }}
                 </div>
             {% endif %}
         </div>
-        
+
+        <!-- Senha -->
         <div class="mb-3">
-            <label for="id_password" class="form-label">Password</label>
+            <label for="id_password" class="form-label">Senha</label>
             <input type="password" name="password" id="id_password" class="form-control" required>
             {% if form.password.errors %}
                 <div class="text-danger">
-                    {% for error in form.password.errors %}
-                        <small>{{ error }}</small>
-                    {% endfor %}
+                    {{ form.password.errors }}
                 </div>
             {% endif %}
         </div>
-        
-        <button type="submit" class="btn btn-primary">Login</button>
+
+        <!-- Botão de Login -->
+        <button type="submit" class="btn btn-primary">Entrar</button>
     </form>
+
+    <!-- Mensagens de Erro -->
+    {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

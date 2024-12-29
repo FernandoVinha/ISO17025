@@ -1,39 +1,61 @@
-{% extends 'base.html' %}
+<!-- accounts/templates/accounts/invite_user.html -->
+{% extends "base.html" %}
+{% load static %}
 
-{% block title %}Invite User{% endblock %}
+{% block title %}Generate Invitation{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Invite User</h2>
+    <div class="text-center mb-4">
+        <h2>Generate Invitation</h2>
+    </div>
     
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
         {% csrf_token %}
-        
-        {% if form.errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-        
+
+        <!-- Email -->
         <div class="mb-3">
-            {{ form.email.label_tag }}
-            {{ form.email }}
+            <label for="id_email" class="form-label">Email</label>
+            <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value|default:'' }}" required>
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
         </div>
-        
-        <button type="submit" class="btn btn-primary">Generate Invitation</button>
+
+        <!-- Role -->
+        <div class="mb-3">
+            <label for="id_role" class="form-label">Role</label>
+            <select name="role" id="id_role" class="form-select" required>
+                <option value="">---------</option>
+                {% for value, label in form.role.field.choices %}
+                    <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.role.errors %}
+                <div class="text-danger">
+                    {{ form.role.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Generate Invitation -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary w-100 w-md-auto">Generate Invitation</button>
+        </div>
     </form>
 
+    <!-- Generated Invitation Link -->
     {% if invite_link %}
-        <div class="mt-4">
-            <p>Invitation link generated:</p>
-            <a href="{{ invite_link }}" class="btn btn-link">{{ invite_link }}</a>
+        <div class="alert alert-success mt-4 text-center" role="alert">
+            <strong>Invitation successfully generated!</strong><br>
+            Link: <a href="{{ invite_link }}" class="text-decoration-none">{{ invite_link }}</a>
         </div>
     {% endif %}
+
+
 </div>
 {% endblock %}

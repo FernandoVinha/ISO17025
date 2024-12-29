@@ -1,5 +1,3 @@
-<!-- locations/templates/locations/measurement_form.html -->
-
 {% extends "base.html" %}
 {% load static %}
 
@@ -13,7 +11,7 @@
         
         <!-- Sala Dropdown -->
         <div class="mb-3">
-            <label for="id_room" class="form-label">Sala</label>
+            <label for="id_room" class="form-label">Room</label>
             <select name="room" id="id_room" class="form-select" required>
                 <option value="">---------</option>
                 {% for room in form.room.field.queryset %}
@@ -29,9 +27,9 @@
             {% endif %}
         </div>
         
-        <!-- Temperatura -->
+        <!-- Temperature -->
         <div class="mb-3">
-            <label for="id_temperature" class="form-label">Temperatura (°C)</label>
+            <label for="id_temperature" class="form-label">Temperature (°C)</label>
             <input type="number" step="0.1" name="temperature" id="id_temperature" class="form-control" value="{{ form.temperature.value|default:'' }}" required>
             {% if form.temperature.errors %}
                 <div class="text-danger">
@@ -40,9 +38,9 @@
             {% endif %}
         </div>
         
-        <!-- Umidade -->
+        <!-- Humidity -->
         <div class="mb-3">
-            <label for="id_humidity" class="form-label">Umidade (%)</label>
+            <label for="id_humidity" class="form-label">Humidity (%)</label>
             <input type="number" step="0.1" name="humidity" id="id_humidity" class="form-control" value="{{ form.humidity.value|default:'' }}" required>
             {% if form.humidity.errors %}
                 <div class="text-danger">
@@ -51,8 +49,19 @@
             {% endif %}
         </div>
 
-        <button type="submit" class="btn btn-primary">{{ button_label }}</button>
-        <a href="{% url 'measurement_room_detail' form.room.value %}" class="btn btn-secondary">Cancelar</a>
+        <!-- Save Changes Button with Clipboard Icon (only if the user has permission) -->
+        {% if locations_permissions.can_add_measurement or locations_permissions.can_change_measurement %}
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-clipboard-check"></i> <!-- Clipboard icon for Save -->
+            </button>
+        {% endif %}
+
+        <!-- Delete Measurement Button with Trash Icon (only for editing) -->
+        {% if measurement %}
+            <a href="{% url 'measurement_delete' measurement.id %}" class="btn btn-danger">
+                <i class="bi bi-trash"></i> <!-- Trash icon for Delete -->
+            </a>
+        {% endif %}
     </form>
 </div>
 {% endblock %}
